@@ -1,0 +1,56 @@
+from playwright.sync_api import sync_playwright
+import json
+exec(open('snap.py').read().split("with sync_playwright()")[0])
+# make order items stale vs catalog
+items[0]["part"]="OLD-KC"; items[0]["custPart"]=""
+items[1]["part"]="OLD-BCH"
+items[2]["completedDate"]="2026-11-06"; items[2]["invoiceId"]="inv1"; items[2]["invoicedAt"]="2026-11-07"; items[2]["part"]="OLD-FT"
+invoices=[{"id":"inv1","invoiceNumber":"INV-PCC-2026-1003","date":"2026-11-07","dueDate":"2026-12-07","status":"sent","event":"","customerId":"c1","customer":customers[0],"lineItems":[{"name":"Tray","part":"OLD-FT","custPart":"","qty":10,"price":14,"extended":140}],"taxable":True,"taxRate":7,"subtotal":140,"taxAmount":9.8,"total":149.8,"notes":""}]
+errs=[]
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path=__import__("os").environ.get("CHROME") or None, args=["--no-sandbox"])
+    pg = b.new_page(viewport={"width":1280,"height":900})
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("console", lambda m: errs.append(m.text) if m.type=="error" else None)
+    pg.goto(html)
+    pg.evaluate("""(d)=>{ localStorage.setItem('pcc_catalog_v1', JSON.stringify(d.catalog)); localStorage.setItem('pcc_customers_v1', JSON.stringify(d.customers)); localStorage.setItem('pcc_orders_v1', JSON.stringify(d.orders)); localStorage.setItem('pcc_invoices_v1', JSON.stringify(d.invoices)); }""", {"catalog":catalog,"customers":customers,"orders":orders,"invoices":invoices})
+    pg.reload(); pg.wait_for_timeout(600)
+    print("toast:", pg.inner_text("#toast"))
+    saved = json.loads(pg.evaluate("localStorage.getItem('pcc_orders_v1')"))
+    print("saved parts:", [(i["part"], i["custPart"]) for i in saved[0]["items"]])
+    inv = json.loads(pg.evaluate("localStorage.getItem('pcc_invoices_v1')"))
+    print("invoice line part untouched:", inv[0]["lineItems"][0]["part"])
+    pg.click("button[data-tab='orders']"); pg.wait_for_timeout(200)
+    pg.locator("#orderListWrap button", has_text="Edit").first.click(); pg.wait_for_timeout(300)
+    print("i1 status:", pg.eval_on_selector("#oi-status-i1","e=>e.options[e.selectedIndex].text"), "| i2:", pg.eval_on_selector("#oi-status-i2","e=>e.options[e.selectedIndex].text"))
+    print("i2 options:", pg.eval_on_selector("#oi-status-i2","e=>[...e.options].map(o=>o.text)"))
+    pg.select_option("#oi-status-i2","waitmaterial"); pg.wait_for_timeout(100)
+    print("i2 -> waitmaterial class:", pg.get_attribute("#oi-status-i2","class"), "| date:", repr(pg.input_value("#oi-completedDate-i2")))
+    pg.select_option("#oi-status-i2","done"); pg.wait_for_timeout(100)
+    print("i2 -> done date:", pg.input_value("#oi-completedDate-i2"), "| invoice btn enabled:", pg.locator("[data-oselect='i2']").count())
+    pg.click("[data-oselect='i2']"); pg.wait_for_timeout(100)
+    pg.select_option("#oi-status-i2","partial"); pg.wait_for_timeout(100)
+    print("i2 -> partial date:", repr(pg.input_value("#oi-completedDate-i2")), "| bar:", pg.inner_text("#createInvFromOrderBtn"))
+    pg.fill("#oi-completedDate-i2","2026-11-09"); pg.wait_for_timeout(100)
+    print("typing date -> status:", pg.eval_on_selector("#oi-status-i2","e=>e.options[e.selectedIndex].text"))
+    pg.fill("#oi-completedDate-i2",""); pg.wait_for_timeout(100)
+    print("clearing date -> status:", pg.eval_on_selector("#oi-status-i2","e=>e.options[e.selectedIndex].text"))
+    pg.select_option("#oi-status-i2","waitresponse")
+    pg.click("#saveOrderBtn"); pg.wait_for_timeout(200)
+    saved = json.loads(pg.evaluate("localStorage.getItem('pcc_orders_v1')"))
+    print("saved prodStatus:", [i.get("prodStatus") for i in saved[0]["items"]])
+    pg.screenshot(path="b_editor.png", full_page=False)
+    pg.click("#previewOrderBtn"); pg.wait_for_timeout(300)
+    print("print status col:", pg.eval_on_selector_all("#oItems tr", "rs=>rs.map(r=>r.children[7].innerText)"))
+    pg.screenshot(path="b_print.png")
+    pg.click("#closeOrderPreviewBtn") if pg.locator("#closeOrderPreviewBtn").count() else pg.keyboard.press("Escape")
+    # catalog edit sync
+    pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(200)
+    pg.locator("[data-editprod='p1']").last.click(); pg.wait_for_timeout(100)
+    pg.fill("#pmPart", "PCC-KC-99")
+    pg.click("#pmSave"); pg.wait_for_timeout(200)
+    print("catalog-edit toast:", pg.inner_text("#toast"))
+    saved = json.loads(pg.evaluate("localStorage.getItem('pcc_orders_v1')"))
+    print("after edit part:", saved[0]["items"][0]["part"])
+    b.close()
+print("ERRORS:", errs)

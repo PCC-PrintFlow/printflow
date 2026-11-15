@@ -1,0 +1,45 @@
+from playwright.sync_api import sync_playwright
+import json
+exec(open('test_n.py').read().split('\nerrs=[]\n')[0])
+errs=[]
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path=__import__("os").environ.get("CHROME") or None, args=["--no-sandbox"])
+    pg = b.new_page(viewport={"width":1366,"height":1000})
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("console", lambda m: errs.append(m.text) if m.type=="error" else None)
+    pg.goto(html)
+    pg.evaluate("""(d)=>{ localStorage.clear(); localStorage.setItem('pcc_catalog_v1', JSON.stringify(d.catalog)); localStorage.setItem('pcc_customers_v1', JSON.stringify([d.cust])); localStorage.setItem('pcc_orders_v1', JSON.stringify(d.orders)); localStorage.setItem('pcc_materials_v1', JSON.stringify(d.mats)); localStorage.setItem('pcc_settings_v1', JSON.stringify({nextOrderNum:10, invPrefix:'PCC', nextInvNum:1005, machineRate:0.3, laborRate:20, targetMargin:50})); }""", {"catalog":catalog,"cust":cust,"orders":orders,"mats":mats})
+    pg.reload(); pg.wait_for_timeout(300)
+    pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(150)
+    pg.locator("#catalogListWrap [data-editprod='p1']").first.click(); pg.wait_for_timeout(150)
+    print("note off:", pg.inner_text("#pmPurgeNote"), "| qty visible:", pg.is_visible("#pmPurgePer"))
+    pg.check("#pmMakesPurge"); pg.wait_for_timeout(80)
+    print("note on:", pg.inner_text("#pmPurgeNote"))
+    pg.fill("#pmPurgePer","20"); pg.dispatch_event("#pmPurgePer","input"); pg.wait_for_timeout(100)
+    print("summary:", pg.inner_text("#pmSummary").replace("\n"," | "))
+    pg.locator("#pmSummary").scroll_into_view_if_needed()
+    pg.screenshot(path="v_editor.png")
+    pg.click("#pmSave"); pg.wait_for_timeout(150)
+    print("catalog cost cell:", pg.locator("#catalogListWrap tbody tr", has_text="PCC-KC-01").first.locator("td").nth(3).inner_text().replace("\n"," "), "| margin:", pg.locator("#catalogListWrap tbody tr", has_text="PCC-KC-01").first.locator("td").nth(5).inner_text())
+    kitrow = pg.locator("#catalogListWrap tbody tr", has_text="PCC-KIT").first
+    print("kit cost:", kitrow.locator("td").nth(3).inner_text().replace("\n"," "))
+    # kit editor hides purge box
+    pg.locator("#catalogListWrap [data-editprod='p4']").first.click(); pg.wait_for_timeout(150)
+    print("kit purge box visible:", pg.is_visible("#pmPurgeBox")); pg.click("#pmCancel")
+    # settings price change
+    pg.click("button[data-tab='settings']"); pg.wait_for_timeout(100)
+    print("setting default:", pg.input_value("#setPurgePrice"))
+    pg.fill("#setPurgePrice","6"); pg.click("#saveSettingsBtn") if pg.locator("#saveSettingsBtn").count() else pg.click("text=Save Settings")
+    pg.wait_for_timeout(150)
+    pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(150)
+    print("after $6:", pg.locator("#catalogListWrap tbody tr", has_text="PCC-KC-01").first.locator("td").nth(3).inner_text().replace("\n"," "))
+    # invoice profit check
+    pg.click("button[data-tab='orders']"); pg.wait_for_timeout(100)
+    pg.locator("#orderListWrap tr", has_text="ORD-PCC-2026-0007").locator("[data-oedit]").click(); pg.wait_for_timeout(250)
+    print("order fil note:", pg.inner_text("[data-fil-for='i1'] .of-fil-note").replace("\n"," | "))
+    pg.click("[data-oselect='i1']"); pg.click("#createInvFromOrderBtn"); pg.wait_for_timeout(300)
+    print("profit:", pg.inner_text("#profitBody").replace("\n"," | ")[:200])
+    st=json.loads(pg.evaluate("localStorage.getItem('pcc_catalog_v1')"))
+    print("stored:", [(x["id"],x.get("makesPurge"),x.get("purgePerBlock")) for x in st if x["id"]=="p1"])
+    b.close()
+print("ERRORS:", errs)
