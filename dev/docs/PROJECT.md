@@ -99,7 +99,8 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
   - Downloads are normal; on the iPad the Share sheet opens.
   - `navigator.storage.persist()`.
   - The version shows in the Sync panel.
-- **Open question for the owner:** one token shared by both devices (current setup) vs. one per device.
+- **Decision (2026-11-15):** both devices share one token, for now.
+- **Reminders (2026-11-15):** weekly sync reminder (Sundays, evening) and a one-time token-expiry reminder on 2027-11-01, both set as Claude scheduled tasks (push notifications). They are not built into the app.
 
 ### Creators (design subscriptions, 2026-11-14)
 - **Records → Creators:** designers whose files the owner sells prints of: **Saber3D**, **Kong3D**, **Cinderwing (CWing)** (pre-seeded).
@@ -195,5 +196,4 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
   - Production sheet.
   - Materials-needed totals.
   - Frozen costs on invoices.
-  - Sync reminders.
-  - Token-expiry reminder in the app.
+  - Confirmation pop-up on the iPad before changes that will later be pushed to the PC's data (a reminder that edits may end up in the synced data; both devices are the owner's, but the iPad's user sometimes needs the nudge).
