@@ -1,0 +1,4 @@
+dev/tests/*
+!dev/tests/*.py
+__pycache__/
+*.pyc
