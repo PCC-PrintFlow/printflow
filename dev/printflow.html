@@ -146,7 +146,6 @@
   .modal{background:#fff;border-radius:var(--radius);max-width:420px;width:100%;padding:22px;box-shadow:var(--shadow);}
   .modal h3{margin:0 0 10px;font-size:15.5px;}
   .modal p{font-size:13.5px;color:var(--sub);margin:0 0 16px;}
-  #confirmText{white-space:pre-wrap;max-height:55vh;overflow:auto;}
   .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;}
   select[disabled], input[disabled]{background:#f2f3f4;color:var(--sub);}
   .icon-btn{background:none;border:none;cursor:pointer;color:var(--sub);font-size:15px;padding:2px 4px;}
@@ -861,9 +860,6 @@
         <div class="field"><label for="crFee">Fee ($ per billing period)</label><input type="number" id="crFee" step="0.01" min="0"></div>
         <div class="field"><label for="crUrl">Website (optional)</label><input type="text" id="crUrl" placeholder="e.g. patreon.com/…"></div>
         <div class="field" style="align-self:end;"><button class="btn secondary" id="crAddBtn" type="button">Add Creator</button></div>
-        <div class="field cr-style"><label for="crPartSep">Part # prefix</label>
-          <select id="crPartSep"><option value="dash">CWG-123</option><option value="underscore">CWG_123</option></select></div>
-        <div class="field cr-style" style="align-self:end;"><button class="btn secondary" id="crFixBtn" type="button" title="Move creator prefixes from product names to Part #s">Fix part numbers &amp; names…</button></div>
       </div>
       <div id="creatorListWrap"></div>
     </div>
@@ -5867,7 +5863,7 @@
   function escRe(t){ return String(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
   // The short ID is the prefix of the Part # ("CWG-123"), not of the product name.
   function partPrefixText(c){
-    return c.shortId + ((settings.creatorPartSep||"dash")==="underscore" ? "_" : "-");
+    return c.shortId + "-";
   }
   function partPrefixRe(id){ return new RegExp("^\\s*" + escRe(id) + "\\s*[-_–—:|.]\\s*|^\\s*" + escRe(id) + "\\s+", "i"); }
   function stripCreatorPart(part){
@@ -5888,26 +5884,6 @@
       n = n.replace(re, "");
     });
     return n.trim();
-  }
-  function creatorFromName(name){
-    return creators.find(function(c){
-      return c.shortId && new RegExp("^\\s*(\\[" + escRe(c.shortId) + "\\]|" + escRe(c.shortId) + "(\\s*[-–—:|]|\\s))", "i").test(name||"");
-    }) || null;
-  }
-  // One-time clean-up of products made when the ID went on the name: strip it from the name, put it on the Part #.
-  function creatorFixPlan(){
-    var plan = {changes:[], blankPart:0};
-    catalog.forEach(function(p){
-      var c = creatorById(p.creatorId) || creatorFromName(p.name);
-      if(!c) return;
-      var newName = stripCreatorPrefix(p.name) || p.name;
-      var hasPart = String(p.part||"").trim() !== "";
-      var newPart = hasPart ? withCreatorPart(p.part, c) : p.part;
-      if(!hasPart) plan.blankPart++;
-      var link = p.creatorId !== c.id;
-      if(newName!==p.name || newPart!==p.part || link) plan.changes.push({p:p, c:c, name:newName, part:newPart, link:link});
-    });
-    return plan;
   }
   function creatorCost(c){
     var fee = Number(c.fee)||0;
@@ -5958,7 +5934,6 @@
     var active = creators.filter(function(c){ return c.active!==false; });
     var m = 0, y = 0; active.forEach(function(c){ var k = creatorCost(c); m += k.month; y += k.year; });
     document.getElementById("crSummary").innerHTML = '<div><span class="cr-big">$'+money(m)+'</span> per month</div><div><span class="cr-big">$'+money(y)+'</span> per year</div><div class="muted">'+active.length+' active subscription'+(active.length===1?'':'s')+(creators.length>active.length?' · '+(creators.length-active.length)+' inactive':'')+'</div>';
-    document.getElementById("crPartSep").value = settings.creatorPartSep || "dash";
     if(!creators.length){ wrap.innerHTML = '<div class="empty">No creators yet. Add the designers you subscribe to above.</div>'; return; }
     var list = creators.slice().sort(function(a,b){ return (b.active!==false) - (a.active!==false) || (a.name||"").localeCompare(b.name||""); });
     var html = '<div class="ofg-scroll"><table class="cr-table"><thead><tr><th>Creator</th><th>Short ID</th><th>Billing</th><th class="num">Per month</th><th class="num">Per year</th><th class="num">Products</th><th class="num" title="Sales of their products in the last 12 months: invoices before tax plus craft fair sales with tax backed out">Sales (12 mo)</th><th></th></tr></thead><tbody>';
@@ -6057,26 +6032,6 @@
     ["crName","crId","crFee","crUrl"].forEach(function(i){ document.getElementById(i).value = ""; });
     persistAll(); renderCreators(); toast(name+" added.");
     document.getElementById("crName").focus();
-  });
-  document.getElementById("crPartSep").addEventListener("change", function(){
-    settings.creatorPartSep = this.value; persistAll();
-    toast("New and edited products will use “"+partPrefixText({shortId:"CWG"})+"123”.", 3000);
-  });
-  document.getElementById("crFixBtn").addEventListener("click", function(){
-    var plan = creatorFixPlan();
-    if(!plan.changes.length){ toast("Nothing to fix: no product has a creator ID on its name or a Part # missing its prefix.", 4000); return; }
-    var lines = plan.changes.slice(0,15).map(function(x){
-      return "• "+x.p.name+(x.p.part?" ["+x.p.part+"]":"")+"  →  "+x.name+(x.part?" ["+x.part+"]":" [no Part #]");
-    });
-    if(plan.changes.length>15) lines.push("…and "+(plan.changes.length-15)+" more.");
-    var note = plan.blankPart ? "\n\n"+plan.blankPart+" creator product"+(plan.blankPart===1?" has":"s have")+" no Part # yet; those are left blank." : "";
-    askConfirm("Fix "+plan.changes.length+" product"+(plan.changes.length===1?"":"s")+"?",
-      "Creator IDs come off the product names and go on the Part #s (and products named with a creator's ID are linked to that creator):\n\n"+lines.join("\n")+note+"\n\nPast invoices and orders aren't changed. Push afterwards to sync your other device.",
-      function(){
-        plan.changes.forEach(function(x){ x.p.name = x.name; x.p.part = x.part; x.p.creatorId = x.c.id; });
-        persistAll(); renderCreators(); renderCatalogList(); renderOrderLineItems();
-        toast("Updated "+plan.changes.length+" product"+(plan.changes.length===1?"":"s")+".", 3500);
-      }, "Update");
   });
   // Product editor: picking a creator puts its short ID on the Part #
   document.getElementById("pmCreator").addEventListener("change", function(){

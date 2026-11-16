@@ -72,7 +72,7 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
   - Output: a repeating table header, "Page X of Y", and the logo (canvas → PNG).
 - **Costs:** `productCost(p, seen, swaps)` returns `{materials, machine, labor, extra, components, total, perPrint, printMaterials, printMachine, gross, purge, purgeAll, noPurgeTotal, hasData, incomplete, missing}`.
 - **Product fields:** `catalog` ("business" / "fair" / "both"), `notes`, `creatorId`, `perPrint`, `makesPurge`, `purgePerBlock`, `bom`, `isKit`, `kitItems`, `printHours`, `laborMin`, `extraCost`, `custPart`.
-- **Settings:** `machineRate` 0.30, `laborRate` 20, `targetMargin`, `purgeBlockPrice` 5, `fairTaxRate` 7, `venmoFixed` 0.09, `venmoPct` 2.29, `creatorPartSep` (dash / underscore).
+- **Settings:** `machineRate` 0.30, `laborRate` 20, `targetMargin`, `purgeBlockPrice` 5, `fairTaxRate` 7, `venmoFixed` 0.09, `venmoPct` 2.29, .
 - **Catalog helpers:** `isFair`, `isBusiness`, `inCatView`, `catalogKitGroups`, `groupedProductOptionsHtml`, `defaultFilament()`.
 - **Fairs:** `fairs = {current:{name,date,method,sales:[{id,price,time,method,productId,name}]}, history:[… + rates, closedAt, importedAt?]}`. Functions: `fairTotals`, `fairCsv`, `fairSalesPdfDoc`, `saveFairFile`, `parseFairCsv`.
 - **Creators:** each is `{id, name, shortId, billing, fee, url, notes, active}`. Functions: `creatorCost`, `creatorSales12`, `withCreatorPrefix`, `stripCreatorPrefix`, `nameHasCreatorPrefix`, `validShortId`.
@@ -111,11 +111,10 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
 - **Summary bar:** total per month and per year of active subscriptions.
 - **List:** per-month and per-year fee; product count (expandable; click to edit a product); **Sales (12 mo)** (invoices before tax + fair sales with tax backed out), with "covers the fee" or "$X short".
 - **Products link** via `creatorId`. As of 2026-11-16 the short ID is the prefix of the **Part #**, not of the product name:
-  - Part # style "CWing-123" (or "CWing_123": setting `creatorPartSep`, Creators page). Names are left clean.
+  - Part # style is always "CWG-123" (a hyphen). Names are left clean.
   - Picking a creator in the product editor prefixes the Part # (and swaps/removes it when the creator changes). A Part # that is only the prefix is saved as blank.
   - Changing a short ID re-prefixes that creator's Part #s. Deleting a creator un-links its products but keeps their Part #s.
-  - **Fix part numbers & names…** (Creators page) is a one-time, previewed clean-up: strips the creator ID from names that start with it, prefixes the Part #, links products named with a creator's ID. Products with no Part # are left blank. Old invoices/orders are untouched. Test: `test_crpart.py`.
-  - `creatorPrefixStyle` is retired (still stripped from legacy names).
+  - There is no automatic migration: existing products named with the ID in front are edited by hand (a one-time clean-up button was built and then removed at the owner's request).
 
 ### Craft Fairs (sales tracker, 2026-11-14)
 - Built from the owner's standalone iPad tracker (`craft-fair-tracker-standalone_5.html`). Located at Work → Craft Fairs.

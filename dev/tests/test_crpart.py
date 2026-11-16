@@ -19,19 +19,6 @@ with sync_playwright() as p:
     pg.goto(html)
     pg.evaluate("""(d)=>{ localStorage.clear(); localStorage.setItem('pcc_catalog_v1', JSON.stringify(d.cat)); localStorage.setItem('pcc_creators_v1', JSON.stringify(d.crs)); localStorage.setItem('pcc_materials_v1', JSON.stringify(d.mats)); localStorage.setItem('pcc_settings_v1', JSON.stringify({machineRate:0.3})); }""", {"cat":cat,"crs":crs,"mats":mats})
     pg.reload(); pg.wait_for_timeout(300)
-    pg.click("button[data-tab='creators']"); pg.wait_for_timeout(150)
-    pg.click("#crFixBtn"); pg.wait_for_timeout(100)
-    print(pg.inner_text("#confirmText"))
-    pg.click("#confirmOk"); pg.wait_for_timeout(150)
-    got={x["id"]:(x["name"],x["part"],x.get("creatorId")) for x in json.loads(pg.evaluate("localStorage.getItem('pcc_catalog_v1')"))}
-    print(got)
-    assert got["a"]==("Baby Dragon","CWing-BD-01","c1")
-    assert got["b"]==("Gecko","","c2")
-    assert got["c"]==("Owl","CWing-07","c1")
-    assert got["d"]==("Plain Keychain","KC-1",None)
-    assert got["e"]==("Frog","Kong-9","c2")
-    pg.click("#crFixBtn"); pg.wait_for_timeout(100)
-    assert "Nothing to fix" in pg.inner_text("#toast")
     # editor: picking a creator prefixes the part, name untouched
     pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(150)
     pg.locator("[data-editprod='d']").first.click(); pg.wait_for_timeout(150)
@@ -45,6 +32,7 @@ with sync_playwright() as p:
     pg.click("[data-credit='c1']"); pg.fill("#ceCrId","CW"); pg.click("#ceCrSave"); pg.wait_for_timeout(150)
     print("toast:", pg.inner_text("#toast"))
     got={x["id"]:(x["name"],x["part"]) for x in json.loads(pg.evaluate("localStorage.getItem('pcc_catalog_v1')"))}
-    assert got["a"][1]=="CW-BD-01" and got["d"][1]=="CW-KC-1", got
+    assert got["d"][1]=="CW-KC-1" and got["a"][1]=="BD-01", got
+    assert got["b"][1]=="" and got["e"][1]=="Kong 9"
     print("OK")
 print("ERRORS:", errs)
