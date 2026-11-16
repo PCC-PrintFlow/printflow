@@ -158,6 +158,11 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
 - **Rates:** machine $0.30/print hour, labor $20/hour, target margin (50% recommended).
 - **Margin** = (price − net cost) ÷ price. Shown as chips, in catalog columns, in the invoice Profit check and in history Margin (live costs).
 
+### Parts and plates (2026-11-16)
+- Each Bill of Materials line has an optional **Item name** (Body, Head, Top, Bottom…; suggestions offered, any text allowed) and **Plate #**.
+- With **two or more distinct plate numbers** on a product, the single print-time field is replaced by one **Plate N print time (hours)** field per plate. `printHours` stays the sum of them, so costing, sync and backups work as before; per-plate times are stored in `plateHours` (`{"1":2,"2":1.5}`). Going from one plate to several carries the existing time onto the first plate.
+- New optional fields (no migration): BOM line `part`, `plate`; product `plateHours`. Test: `test_plates.py`.
+
 ### Kits
 - Bundles of products with quantities, extras and kit-level costs; nesting allowed. Grouped by kit everywhere products are listed, with kit names in **bold**. A kit is one line on orders and invoices.
 

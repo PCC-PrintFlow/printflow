@@ -243,6 +243,10 @@
   .pm-bom .pm-qty input{width:110px;text-align:right;}
   .pm-bom .pm-unit{font-size:12.5px;color:var(--sub);min-width:30px;}
   .pm-bom-empty{font-size:13px;color:var(--sub);padding:8px 0;}
+  .pm-bom input[data-bm="part"]{min-width:90px;}
+  .pm-bom input[data-bm="plate"]{width:64px;text-align:center;}
+  #pmPlateBox{margin-top:10px;}
+  #pmPlateBox .pm-plate-note{grid-column:1/-1;font-size:12.5px;color:var(--sub);}
   .pm-bom-actions{margin-top:8px;}
   .pm-newmat{margin-top:10px;font-size:13.5px;}
   .pm-newmat summary{cursor:pointer;color:var(--accent-dark);font-weight:600;}
@@ -1271,10 +1275,12 @@
     </details>
     <h4 class="pm-h">Other costs <span class="muted" id="pmOtherNote">(per piece)</span></h4>
     <div class="grid cols-3">
-      <div class="field"><label for="pmHours" id="pmHoursLabel">Print time (hours)</label><input type="number" id="pmHours" step="0.05" min="0" placeholder="e.g. 2h 15m = 2.25"></div>
+      <div class="field" id="pmHoursField"><label for="pmHours" id="pmHoursLabel">Print time (hours)</label><input type="number" id="pmHours" step="0.05" min="0" placeholder="e.g. 2h 15m = 2.25"></div>
       <div class="field"><label for="pmLabor">Hands-on time (minutes)</label><input type="number" id="pmLabor" step="1" min="0" placeholder="cleanup, assembly, packing"></div>
       <div class="field"><label for="pmExtra">Other cost ($)</label><input type="number" id="pmExtra" step="0.01" min="0" placeholder="packaging, labels, fees"></div>
     </div>
+    <div class="grid cols-3" id="pmPlateBox" style="display:none;"></div>
+    <datalist id="pmPartList"><option value="Body"><option value="Head"><option value="Top"><option value="Bottom"><option value="Base"><option value="Lid"><option value="Insert"></datalist>
     <div class="pm-purge" id="pmPurgeBox">
       <label class="pm-purge-check"><input type="checkbox" id="pmMakesPurge"> Makes purge blocks</label>
       <div class="field" id="pmPurgeQtyWrap"><label for="pmPurgePer">Pieces per purge block</label><input type="number" id="pmPurgePer" step="1" min="1" placeholder="e.g. 20"></div>
@@ -1538,6 +1544,7 @@
     if(p.isKit===undefined) p.isKit = false;
     if(!Array.isArray(p.kitItems)) p.kitItems = [];
     if(p.printHours===undefined) p.printHours = 0;
+    if(!p.plateHours || typeof p.plateHours!=="object") p.plateHours = {};
     if(p.laborMin===undefined) p.laborMin = 0;
     if(p.extraCost===undefined) p.extraCost = 0;
     // Which catalog it's in: "business" (Product Catalog) or "fair" (Craft Fair Catalog).
@@ -4871,6 +4878,7 @@
     document.getElementById("pmNotes").value = pmDraft.notes || "";
     document.getElementById("pmCreator").innerHTML = creatorOptionsHtml(pmDraft.creatorId || "", "— No creator —");
     document.getElementById("pmHours").value = pmDraft.printHours || "";
+    pmPlateMulti = pmPlateList().length>1;
     document.getElementById("pmLabor").value = pmDraft.laborMin || "";
     document.getElementById("pmExtra").value = pmDraft.extraCost || "";
     document.getElementById("pmPerPrint").value = Number(pmDraft.perPrint) > 1 ? Math.round(pmDraft.perPrint) : 1;
@@ -4881,6 +4889,7 @@
     document.getElementById("pmNmUnit").textContent = "g";
     renderPmKit();
     renderPmBom();
+    renderPmPlates();
     renderPmSummary();
     prodModal.style.display = "flex";
     setTimeout(function(){
@@ -5011,7 +5020,9 @@
     pmDraft.creatorId = document.getElementById("pmCreator").value || "";
     var pmCr = creatorById(pmDraft.creatorId);
     if(pmCr && pmDraft.name && !nameHasCreatorPrefix(pmDraft.name, pmCr)) pmDraft.name = withCreatorPrefix(pmDraft.name, pmCr);
-    pmDraft.printHours = Math.max(0, parseFloat(document.getElementById("pmHours").value) || 0);
+    pmDraft.printHours = pmPlateList().length>1
+      ? pmPlateList().reduce(function(t,k){ return t + (Number(pmDraft.plateHours[k])||0); }, 0)
+      : Math.max(0, parseFloat(document.getElementById("pmHours").value) || 0);
     pmDraft.laborMin = Math.max(0, parseFloat(document.getElementById("pmLabor").value) || 0);
     pmDraft.extraCost = Math.max(0, parseFloat(document.getElementById("pmExtra").value) || 0);
     pmDraft.perPrint = Math.max(1, Math.round(parseFloat(document.getElementById("pmPerPrint").value) || 1));
@@ -5026,11 +5037,13 @@
       wrap.innerHTML = '<div class="pm-bom-empty">No materials yet. '+(materials.length ? 'Click "+ Add material line".' : 'Add materials on the Materials tab, or create one right here below (e.g. PLA: $19.99 for 1000 g).')+'</div>';
       return;
     }
-    var html = '<table><thead><tr><th>Material</th><th>'+(pmDraft.isKit?'Qty per kit':(Number(pmDraft.perPrint)>1?'Qty per print':'Qty per piece'))+'</th><th class="num">Cost</th><th style="width:40px;"></th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>Item name</th><th>Plate #</th><th>Material</th><th>'+(pmDraft.isKit?'Qty per kit':(Number(pmDraft.perPrint)>1?'Qty per print':'Qty per piece'))+'</th><th class="num">Cost</th><th style="width:40px;"></th></tr></thead><tbody>';
     pmDraft.bom.forEach(function(b){
       var m = materials.find(function(x){ return x.id===b.materialId; });
       var cost = m ? materialUnitCost(m)*(Number(b.qty)||0) : 0;
       html += '<tr>'+
+        '<td><label class="of-sr" for="bm-part-'+b.id+'">Item name</label><input type="text" id="bm-part-'+b.id+'" list="pmPartList" data-bm="part" data-bid="'+b.id+'" placeholder="e.g. Body" value="'+escapeHtml(b.part||"")+'"></td>'+
+        '<td><label class="of-sr" for="bm-plate-'+b.id+'">Plate number</label><input type="text" inputmode="numeric" maxlength="4" id="bm-plate-'+b.id+'" data-bm="plate" data-bid="'+b.id+'" placeholder="—" value="'+escapeHtml(b.plate||"")+'"></td>'+
         '<td><label class="of-sr" for="bm-mat-'+b.id+'">Material</label><select id="bm-mat-'+b.id+'" data-bm="materialId" data-bid="'+b.id+'">'+
           (b.materialId && !m ? '<option value="'+escapeHtml(b.materialId)+'" selected>(deleted material)</option>' : '')+
           materialOptionsHtml(b.materialId)+'</select></td>'+
@@ -5045,6 +5058,20 @@
       sel.addEventListener("change", function(){
         var b = pmDraft.bom.find(function(x){ return x.id===sel.dataset.bid; });
         if(b){ b.materialId = sel.value; renderPmBom(); renderPmSummary(); }
+      });
+    });
+    wrap.querySelectorAll('input[data-bm="part"]').forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var b = pmDraft.bom.find(function(x){ return x.id===inp.dataset.bid; });
+        if(b) b.part = inp.value;
+      });
+    });
+    wrap.querySelectorAll('input[data-bm="plate"]').forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var b = pmDraft.bom.find(function(x){ return x.id===inp.dataset.bid; });
+        if(!b) return;
+        b.plate = inp.value.trim();
+        renderPmPlates(); renderPmSummary();
       });
     });
     wrap.querySelectorAll('input[data-bm="qty"]').forEach(function(inp){
@@ -5066,8 +5093,58 @@
     });
   }
 
+  // Plates: distinct plate numbers on the BOM lines. With 2+ plates, each gets its own print time
+  // and the product's printHours is their sum (so costing, sync and backups are unchanged).
+  var pmPlateMulti = false;
+  function pmPlateList(){
+    var seen = {}, out = [];
+    ((pmDraft && pmDraft.bom) || []).forEach(function(b){
+      var k = String(b.plate||"").trim();
+      if(k && !seen[k]){ seen[k] = true; out.push(k); }
+    });
+    return out.sort(function(a,b){ var na = parseFloat(a), nb = parseFloat(b); return (isNaN(na)||isNaN(nb)) ? a.localeCompare(b) : na-nb; });
+  }
+  function renderPmPlates(){
+    var box = document.getElementById("pmPlateBox"), single = document.getElementById("pmHoursField");
+    var list = pmPlateList(), multi = list.length>1;
+    if(!pmDraft.plateHours) pmDraft.plateHours = {};
+    if(multi && !pmPlateMulti){
+      // Just went from one plate to several: carry the existing print time onto the first plate.
+      var sum = list.reduce(function(t,k){ return t + (Number(pmDraft.plateHours[k])||0); }, 0);
+      var cur = parseFloat(document.getElementById("pmHours").value) || 0;
+      if(!sum && cur>0) pmDraft.plateHours[list[0]] = cur;
+    } else if(!multi && pmPlateMulti){
+      var tot = Object.keys(pmDraft.plateHours).reduce(function(t,k){ return t + (Number(pmDraft.plateHours[k])||0); }, 0);
+      if(tot>0) document.getElementById("pmHours").value = Math.round(tot*1000)/1000;
+    }
+    pmPlateMulti = multi;
+    single.style.display = multi ? "none" : "";
+    box.style.display = multi ? "" : "none";
+    if(!multi){ box.innerHTML = ""; return; }
+    var per = (!pmDraft.isKit && Number(pmDraft.perPrint)>1) ? "whole print" : "per piece";
+    box.innerHTML = list.map(function(k){
+      var v = pmDraft.plateHours[k];
+      return '<div class="field"><label for="pm-plate-h-'+escapeHtml(k)+'">Plate '+escapeHtml(k)+' print time (hours)</label>'+
+        '<input type="number" id="pm-plate-h-'+escapeHtml(k)+'" data-platehrs="'+escapeHtml(k)+'" step="0.05" min="0" placeholder="e.g. 2h 15m = 2.25" value="'+(v?escapeHtml(String(v)):"")+'"></div>';
+    }).join("") + '<div class="pm-plate-note" id="pmPlateTotal"></div>';
+    box.querySelectorAll("[data-platehrs]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        pmDraft.plateHours[inp.dataset.platehrs] = Math.max(0, parseFloat(inp.value)||0);
+        renderPmSummary();
+      });
+    });
+    updatePlateTotal();
+  }
+  function updatePlateTotal(){
+    var el = document.getElementById("pmPlateTotal"); if(!el || !pmDraft) return;
+    var list = pmPlateList();
+    var tot = list.reduce(function(t,k){ return t + (Number(pmDraft.plateHours[k])||0); }, 0);
+    el.textContent = list.length+" plates · total print time "+(Math.round(tot*1000)/1000)+" h ("+(((!pmDraft.isKit && Number(pmDraft.perPrint)>1)) ? "whole print" : "per piece")+")";
+  }
+
   function renderPmSummary(){
     readPmFields();
+    updatePlateTotal();
     var c = productCost(pmDraft);
     // Purge block option (single products only; a kit's products carry their own credit)
     document.getElementById("pmPurgeBox").style.display = pmDraft.isKit ? "none" : "";
@@ -5093,9 +5170,11 @@
         ? row("Materials: $"+money(c.printMaterials)+" per print ÷ "+c.perPrint, "$"+money(c.materials))
         : row("Materials", "$"+money(c.materials));
     }
+    var plateTxt = pmPlateList().length>1 ? " ("+pmPlateList().map(function(k){ return "Plate "+k+" "+(Number(pmDraft.plateHours[k])||0); }).join(" + ")+")" : "";
+    var ptH = Math.round(pmDraft.printHours*1000)/1000;
     if(pmDraft.printHours>0) html += c.perPrint > 1
-      ? row("Print time: "+pmDraft.printHours+" h × $"+money(mr)+"/h = $"+money(c.printMachine)+" ÷ "+c.perPrint, "$"+money(c.machine))
-      : row("Print time: "+pmDraft.printHours+" h × $"+money(mr)+"/h", "$"+money(c.machine));
+      ? row("Print time: "+ptH+" h"+plateTxt+" × $"+money(mr)+"/h = $"+money(c.printMachine)+" ÷ "+c.perPrint, "$"+money(c.machine))
+      : row("Print time: "+ptH+" h"+plateTxt+" × $"+money(mr)+"/h", "$"+money(c.machine));
     if(pmDraft.laborMin>0) html += row("Hands-on: "+pmDraft.laborMin+" min × $"+money(lr)+"/h", "$"+money(c.labor));
     if(c.extra>0) html += row("Other", "$"+money(c.extra));
     if(c.purge>0){
@@ -5192,7 +5271,17 @@
   document.getElementById("pmSave").addEventListener("click", function(){
     readPmFields();
     if(!pmDraft.name){ toast("Product name can't be empty."); document.getElementById("pmName").focus(); return; }
-    pmDraft.bom = pmDraft.bom.filter(function(b){ return b.materialId; }).map(function(b){ return {id:b.id, materialId:b.materialId, qty:Number(b.qty)||0}; });
+    pmDraft.bom = pmDraft.bom.filter(function(b){ return b.materialId; }).map(function(b){
+      var o = {id:b.id, materialId:b.materialId, qty:Number(b.qty)||0};
+      if(String(b.part||"").trim()) o.part = String(b.part).trim();
+      if(String(b.plate||"").trim()) o.plate = String(b.plate).trim();
+      return o;
+    });
+    // Per-plate print times only apply while 2+ plates exist; printHours is their sum.
+    var plKeys = pmPlateList(), plKept = {};
+    if(plKeys.length>1){ plKeys.forEach(function(k){ plKept[k] = Number(pmDraft.plateHours[k])||0; }); }
+    pmDraft.plateHours = plKept;
+    if(plKeys.length>1) pmDraft.printHours = plKeys.reduce(function(t,k){ return t + plKept[k]; }, 0);
     pmDraft.kitItems = pmDraft.isKit
       ? pmDraft.kitItems.filter(function(k){ return k.productId && (Number(k.qty)||0) > 0; }).map(function(k){ return {id:k.id, productId:k.productId, qty:Number(k.qty)||0}; })
       : [];
