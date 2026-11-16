@@ -50,10 +50,10 @@ with sync_playwright() as p:
     pg.click("[data-crprods='cr_cinderwing']"); pg.wait_for_timeout(80)
     pg.screenshot(path="cr_list2.png")
     # prefix style
-    pg.select_option("#crPrefixStyle","bracket")
+    pg.select_option("#crPartSep","underscore")
     pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(150)
     pg.select_option("#catCreator","cr_saber3d"); pg.fill("#catName","Saber Hilt"); pg.click("#catAddBtn"); pg.wait_for_timeout(150)
-    print("bracket:", pg.input_value("#pmName")); pg.click("#pmCancel")
+    print("part underscore:", pg.input_value("#pmPart")); pg.click("#pmCancel")
     # delete creator
     pg.click("button[data-tab='creators']"); pg.wait_for_timeout(150)
     pg.click("[data-crdel='cr_kong3d']"); print("del msg:", pg.inner_text("#confirmText")[:90]); pg.click("#confirmOk"); pg.wait_for_timeout(100)
