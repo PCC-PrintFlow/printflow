@@ -856,13 +856,13 @@
       <div class="cr-summary" id="crSummary"></div>
       <div class="grid cols-4 cr-add">
         <div class="field"><label for="crName">Creator name</label><input type="text" id="crName" placeholder="e.g. Cinderwing"></div>
-        <div class="field"><label for="crId">Short ID (unique)</label><input type="text" id="crId" placeholder="e.g. CWing" maxlength="16" autocomplete="off"></div>
+        <div class="field"><label for="crId">Short ID (unique)</label><input type="text" id="crId" placeholder="e.g. CWG" maxlength="16" autocomplete="off"></div>
         <div class="field"><label for="crBilling">Billing</label><select id="crBilling"><option value="monthly">Monthly</option><option value="annual">Annual</option></select></div>
         <div class="field"><label for="crFee">Fee ($ per billing period)</label><input type="number" id="crFee" step="0.01" min="0"></div>
         <div class="field"><label for="crUrl">Website (optional)</label><input type="text" id="crUrl" placeholder="e.g. patreon.com/…"></div>
         <div class="field" style="align-self:end;"><button class="btn secondary" id="crAddBtn" type="button">Add Creator</button></div>
         <div class="field cr-style"><label for="crPartSep">Part # prefix</label>
-          <select id="crPartSep"><option value="dash">CWing-123</option><option value="underscore">CWing_123</option></select></div>
+          <select id="crPartSep"><option value="dash">CWG-123</option><option value="underscore">CWG_123</option></select></div>
         <div class="field cr-style" style="align-self:end;"><button class="btn secondary" id="crFixBtn" type="button" title="Move creator prefixes from product names to Part #s">Fix part numbers &amp; names…</button></div>
       </div>
       <div id="creatorListWrap"></div>
@@ -5861,11 +5861,11 @@
   });
 
   /* ================= CREATORS (design subscriptions) =================
-     Each creator has a unique short ID (e.g. "CWing") that is put in front of the names of
+     Each creator has a unique short ID (e.g. "CWG") that is put in front of the names of
      products made from their designs, a billing period and fee, and the products tied to them. */
   function creatorById(id){ return id ? creators.find(function(c){ return c.id===id; }) : null; }
   function escRe(t){ return String(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-  // The short ID is the prefix of the Part # ("CWing-123"), not of the product name.
+  // The short ID is the prefix of the Part # ("CWG-123"), not of the product name.
   function partPrefixText(c){
     return c.shortId + ((settings.creatorPartSep||"dash")==="underscore" ? "_" : "-");
   }
@@ -5943,7 +5943,7 @@
   }
   function validShortId(sid, exceptId){
     sid = String(sid||"").trim();
-    if(!sid) return "Enter a short ID (e.g. CWing).";
+    if(!sid) return "Enter a short ID (e.g. CWG).";
     if(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,15}$/.test(sid)) return "Short ID: letters, numbers, - or _ only, no spaces (up to 16).";
     var clash = creators.find(function(c){ return c.id!==exceptId && (c.shortId||"").toLowerCase()===sid.toLowerCase(); });
     if(clash) return "“"+sid+"” is already used by "+clash.name+". Each creator needs a unique short ID.";
@@ -6060,7 +6060,7 @@
   });
   document.getElementById("crPartSep").addEventListener("change", function(){
     settings.creatorPartSep = this.value; persistAll();
-    toast("New and edited products will use “"+partPrefixText({shortId:"CWing"})+"123”.", 3000);
+    toast("New and edited products will use “"+partPrefixText({shortId:"CWG"})+"123”.", 3000);
   });
   document.getElementById("crFixBtn").addEventListener("click", function(){
     var plan = creatorFixPlan();
