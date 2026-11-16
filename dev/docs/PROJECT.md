@@ -123,6 +123,9 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
   - Cash/Venmo toggle (Venmo is the default).
   - Craft Fair Catalog item buttons.
   - Quick prices $1–$15 and Custom.
+- **Multi-item sale (2026-11-16):** the **Multi-item sale** toggle turns taps (catalog items and quick prices) into a "Current sale" cart with +/− quantities; **Log Venmo/Cash sale** records it as one transaction (one Venmo fee). With the toggle off, one tap still logs one sale.
+  - Stored as a normal sale plus optional `lines: [{productId, name, qty, unit}]`; `price` is the total and `name` is a summary ("Dragon; Keychain x2"). Old sales and the sync format are unchanged. "Items sold" and "Sold by item" count quantities; profit estimates use each line's cost and share the fee by revenue.
+  - CSV/PDF show the summary in the Item column; importing the CSV rebuilds the lines when every part matches a Craft Fair item and the prices add up. Test: `test_multi.py`.
 - **Totals:**
   - Items sold, cash, Venmo.
   - Taxable (gross ÷ 1.07) and tax due.
