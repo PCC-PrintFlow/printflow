@@ -245,6 +245,14 @@
   .pm-bom-empty{font-size:13px;color:var(--sub);padding:8px 0;}
   .pm-bom input[data-bm="part"]{min-width:90px;}
   .pm-bom input[data-bm="plate"]{width:64px;text-align:center;}
+  .pm-bom tr.bom-detail td{padding-top:0;border-top:0;}
+  .bom-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:2px 0 6px 10px;border-left:3px solid #d9e2ec;}
+  .bom-detail-grid label{display:block;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:2px;}
+  .bom-detail-grid input,.bom-detail-grid select{width:100%;}
+  @media(max-width:700px){.bom-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  .pm-addtokit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 2px;}
+  .pm-addtokit select{max-width:260px;}
+  .pm-addtokit input[type=number]{width:70px;}
   #pmPlateBox{margin-top:10px;}
   #pmPlateBox .pm-plate-note{grid-column:1/-1;font-size:12.5px;color:var(--sub);}
   .pm-bom-actions{margin-top:8px;}
@@ -1267,10 +1275,27 @@
       <label><input type="radio" name="pmType" value="single" id="pmTypeSingle"> Single product</label>
       <label><input type="radio" name="pmType" value="kit" id="pmTypeKit"> Kit <span class="muted">(a bundle of other catalog products)</span></label>
     </div>
+    <div class="pm-addtokit" id="pmAddToKitRow" style="display:none;">
+      <label for="pmAddToKit"><strong>Also add to a kit:</strong></label>
+      <select id="pmAddToKit" aria-label="Add this product to a kit"></select>
+      <label for="pmAddToKitQty" class="muted">Qty</label><input type="number" id="pmAddToKitQty" min="1" step="1" value="1">
+    </div>
     <div id="pmKitSection" style="display:none;">
       <h4 class="pm-h">Kit contents <span class="muted">(per kit)</span></h4>
       <div id="pmKit"></div>
       <div class="pm-bom-actions"><button class="btn secondary sm" id="pmAddKitLine" type="button">+ Add product to kit</button></div>
+      <details class="pm-newmat" id="pmNewProd">
+        <summary>+ Product not in the catalog yet? Create it here</summary>
+        <div class="mat-add" style="margin-top:10px;">
+          <div class="field mat-f-name"><label for="pmNpName">Product name</label><input type="text" id="pmNpName" placeholder="e.g. Keychain"></div>
+          <div class="field mat-f-num"><label for="pmNpPrice">Price ($)</label><input type="number" id="pmNpPrice" step="0.01" min="0"></div>
+          <div class="field mat-f-num"><label for="pmNpGrams">Filament (g)</label><input type="number" id="pmNpGrams" step="any" min="0" placeholder="optional"></div>
+          <div class="field mat-f-num"><label for="pmNpHours">Print time (h)</label><input type="number" id="pmNpHours" step="0.05" min="0" placeholder="optional"></div>
+          <div class="field mat-f-num"><label for="pmNpQty">Qty in kit</label><input type="number" id="pmNpQty" step="1" min="1" value="1"></div>
+          <div class="field mat-f-btn"><button class="btn sm" id="pmNpAdd" type="button">Create &amp; add to kit</button></div>
+        </div>
+        <div class="muted" style="font-size:12.5px;margin-top:4px;">It's saved to the catalog right away (in the same catalog as this kit). Edit it there later to finish its costs, colors and printer.</div>
+      </details>
       <div class="pm-kit-compare" id="pmKitCompare"></div>
     </div>
     <div class="pm-batch" id="pmBatchBox">
@@ -1299,6 +1324,7 @@
       <div class="field"><label for="pmExtra">Other cost ($)</label><input type="number" id="pmExtra" step="0.01" min="0" placeholder="packaging, labels, fees"></div>
     </div>
     <div class="grid cols-3" id="pmPlateBox" style="display:none;"></div>
+    <datalist id="pmBrandList"></datalist><datalist id="pmColorList"></datalist><datalist id="pmFilTypeList"></datalist>
     <datalist id="pmPartList"><option value="Body"><option value="Head"><option value="Top"><option value="Bottom"><option value="Base"><option value="Lid"><option value="Insert"></datalist>
     <div class="pm-purge" id="pmPurgeBox">
       <label class="pm-purge-check"><input type="checkbox" id="pmMakesPurge"> Makes purge blocks</label>
@@ -1557,6 +1583,14 @@
     {v:"hardware", label:"Hardware", unit:"each"},
     {v:"other", label:"Other", unit:"each"}
   ];
+  // Printers you can prefer for a filament line (a stored value that isn't listed here is kept as-is).
+  var PRINTERS = ["Bambu H2D","Bambu X1C","Bambu P1S","Bambu A2L","Sovol SV06","Prusa MK3S+"];
+  var FILAMENT_TYPES = ["PLA","PLA+","PLA Silk","PLA Matte","PETG","ABS","ASA","TPU","PC","Nylon"];
+  function printerOptionsHtml(sel){
+    var list = PRINTERS.slice();
+    if(sel && list.indexOf(sel)<0) list.push(sel);
+    return '<option value="">— No preference —</option>'+list.map(function(n){ return '<option value="'+escapeHtml(n)+'"'+(n===sel?' selected':'')+'>'+escapeHtml(n)+'</option>'; }).join("");
+  }
   function materialTypeLabel(v){ var t = MATERIAL_TYPES.find(function(x){ return x.v===v; }); return t ? t.label.replace(/ \(.*\)$/,"") : "Other"; }
   function migrateProductCost(p){
     if(!Array.isArray(p.bom)) p.bom = [];
@@ -4925,6 +4959,10 @@
     document.getElementById("pmNewMat").open = materials.length===0;
     document.getElementById("pmNmType").innerHTML = typeOptionsHtml("filament");
     document.getElementById("pmNmUnit").textContent = "g";
+    var kitsHere = catalog.filter(function(c){ return c.isKit && c.id!==pmDraft.id; }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+    document.getElementById("pmAddToKit").innerHTML = '<option value="">— Not in a kit —</option>'+kitsHere.map(function(k){ return '<option value="'+k.id+'">'+escapeHtml(k.name)+'</option>'; }).join("");
+    document.getElementById("pmAddToKitQty").value = 1;
+    document.getElementById("pmNewProd").open = false;
     renderPmKit();
     renderPmBom();
     renderPmPlates();
@@ -4942,6 +4980,7 @@
   function applyPmTypeView(){
     var kit = !!pmDraft.isKit;
     document.getElementById("pmKitSection").style.display = kit ? "" : "none";
+    document.getElementById("pmAddToKitRow").style.display = (!kit && catalog.some(function(c){ return c.isKit && c.id!==pmDraft.id; })) ? "" : "none";
     var per = (!kit && Number(pmDraft.perPrint) > 1) ? Math.round(Number(pmDraft.perPrint)) : 1;
     document.getElementById("pmBatchBox").style.display = kit ? "none" : "";
     document.getElementById("pmBomTitle").innerHTML = kit
@@ -5069,6 +5108,20 @@
     pmDraft.purgePerBlock = Math.max(0, Math.round(parseFloat(document.getElementById("pmPurgePer").value) || 0));
   }
 
+  // Suggestions for the Brand / Color / Type boxes: what you've already used on other lines, plus common types.
+  function fillBomDatalists(){
+    var brands = {}, colors = {}, types = {};
+    FILAMENT_TYPES.forEach(function(t){ types[t] = 1; });
+    catalog.concat(pmDraft ? [pmDraft] : []).forEach(function(pr){
+      (pr.bom||[]).forEach(function(b){
+        if(b.brand) brands[b.brand] = 1;
+        if(b.color) colors[b.color] = 1;
+        if(b.ftype) types[b.ftype] = 1;
+      });
+    });
+    function fill(id, o){ document.getElementById(id).innerHTML = Object.keys(o).sort().map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join(""); }
+    fill("pmBrandList", brands); fill("pmColorList", colors); fill("pmFilTypeList", types);
+  }
   function renderPmBom(){
     var wrap = document.getElementById("pmBom");
     wrap.className = "pm-bom";
@@ -5090,9 +5143,24 @@
         '<td class="num" data-bmcost="'+b.id+'">$'+money(cost)+'</td>'+
         '<td><button type="button" class="icon-btn" data-bmdel="'+b.id+'" title="Remove line" aria-label="Remove line">✕</button></td>'+
       '</tr>';
+      if(m && m.type==="filament"){
+        html += '<tr class="bom-detail"><td colspan="6"><div class="bom-detail-grid">'+
+          '<div><label for="bx-brand-'+b.id+'">Brand</label><input type="text" id="bx-brand-'+b.id+'" list="pmBrandList" data-bx="brand" data-bid="'+b.id+'" placeholder="e.g. Bambu Lab" value="'+escapeHtml(b.brand||"")+'"></div>'+
+          '<div><label for="bx-color-'+b.id+'">Color</label><input type="text" id="bx-color-'+b.id+'" list="pmColorList" data-bx="color" data-bid="'+b.id+'" placeholder="e.g. Jade White" value="'+escapeHtml(b.color||"")+'"></div>'+
+          '<div><label for="bx-ftype-'+b.id+'">Type</label><input type="text" id="bx-ftype-'+b.id+'" list="pmFilTypeList" data-bx="ftype" data-bid="'+b.id+'" placeholder="e.g. PLA, PETG, TPU" value="'+escapeHtml(b.ftype||"")+'"></div>'+
+          '<div><label for="bx-printer-'+b.id+'">Preferred printer</label><select id="bx-printer-'+b.id+'" data-bx="printer" data-bid="'+b.id+'">'+printerOptionsHtml(b.printer||"")+'</select></div>'+
+        '</div></td></tr>';
+      }
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
+    fillBomDatalists();
+    wrap.querySelectorAll('[data-bx]').forEach(function(el){
+      el.addEventListener(el.tagName==="SELECT" ? "change" : "input", function(){
+        var b = pmDraft.bom.find(function(x){ return x.id===el.dataset.bid; });
+        if(b) b[el.dataset.bx] = el.value;
+      });
+    });
     wrap.querySelectorAll('select[data-bm="materialId"]').forEach(function(sel){
       sel.addEventListener("change", function(){
         var b = pmDraft.bom.find(function(x){ return x.id===sel.dataset.bid; });
@@ -5286,6 +5354,30 @@
     renderPmBom(); renderPmSummary();
     var sel = document.getElementById("bm-mat-"+b.id); if(sel) sel.focus();
   });
+  document.getElementById("pmNpAdd").addEventListener("click", function(){
+    var name = document.getElementById("pmNpName").value.trim();
+    if(!name){ toast("Enter the new product's name."); document.getElementById("pmNpName").focus(); return; }
+    var grams = Math.max(0, parseFloat(document.getElementById("pmNpGrams").value)||0);
+    var np = {id:uid(), name:name, part:"", custPart:"",
+      price: Math.max(0, parseFloat(document.getElementById("pmNpPrice").value)||0),
+      catalog: document.getElementById("pmCatBoth").checked ? "both" : (document.getElementById("pmCatFair").checked ? "fair" : "business"),
+      bom: [], printHours: Math.max(0, parseFloat(document.getElementById("pmNpHours").value)||0), laborMin:0, extraCost:0};
+    var df = defaultFilament();
+    if(grams>0 && df) np.bom.push({id:uid(), materialId:df.id, qty:grams});
+    migrateProductCost(np);
+    catalog.push(np);
+    var qty = Math.max(1, Math.round(parseFloat(document.getElementById("pmNpQty").value)||1));
+    var empty = pmDraft.kitItems.find(function(k){ return !k.productId; });
+    var line = empty || {id:uid(), productId:"", qty:qty};
+    line.productId = np.id; line.qty = qty;
+    if(!empty) pmDraft.kitItems.push(line);
+    persistAll();
+    ["pmNpName","pmNpPrice","pmNpGrams","pmNpHours"].forEach(function(id){ document.getElementById(id).value = ""; });
+    document.getElementById("pmNpQty").value = 1;
+    document.getElementById("pmNewProd").open = false;
+    renderPmKit(); renderPmSummary(); renderCatalogList(); renderLineItems(); renderOrderLineItems();
+    toast("“"+name+"” added to the catalog and to this kit."+(grams>0 && df ? "" : " It has no costs yet — Edit it in the catalog to add them."));
+  });
   document.getElementById("pmNmType").addEventListener("change", function(){
     document.getElementById("pmNmUnit").textContent = unitForType(this.value);
   });
@@ -5314,6 +5406,10 @@
       var o = {id:b.id, materialId:b.materialId, qty:Number(b.qty)||0};
       if(String(b.part||"").trim()) o.part = String(b.part).trim();
       if(String(b.plate||"").trim()) o.plate = String(b.plate).trim();
+      var mat = materials.find(function(x){ return x.id===b.materialId; });
+      if(mat && mat.type==="filament"){
+        ["brand","color","ftype","printer"].forEach(function(k){ if(String(b[k]||"").trim()) o[k] = String(b[k]).trim(); });
+      }
       return o;
     });
     // Per-plate print times only apply while 2+ plates exist; printHours is their sum.
@@ -5336,13 +5432,22 @@
       Object.assign(saved, pmDraft);
     }
     var synced = pmIsNew ? 0 : syncOrderPartsFromCatalog();
+    var kitMsg = "";
+    var kitSel = document.getElementById("pmAddToKit").value;
+    if(kitSel && !saved.isKit){
+      var tk = catalog.find(function(x){ return x.id===kitSel && x.isKit; });
+      if(tk){
+        if((tk.kitItems||[]).some(function(it){ return it.productId===saved.id; })) kitMsg = " It was already in “"+tk.name+"”.";
+        else { tk.kitItems.push({id:uid(), productId:saved.id, qty:Math.max(1, Math.round(parseFloat(document.getElementById("pmAddToKitQty").value)||1))}); kitMsg = " Added to the kit “"+tk.name+"”."; }
+      }
+    }
     persistAll();
     closeProductModal();
     renderCatalogList();
     renderLineItems(); // keep the New Invoice catalog dropdown in sync
     renderOrderLineItems(); // keep the New Order Form catalog dropdown in sync
     renderTotals();
-    toast(pmIsNew ? "Product saved to catalog." : (synced ? "Product updated. Part numbers updated on "+synced+" order item"+(synced===1?"":"s")+"." : "Product updated."));
+    toast((pmIsNew ? "Product saved to catalog." : (synced ? "Product updated. Part numbers updated on "+synced+" order item"+(synced===1?"":"s")+"." : "Product updated."))+kitMsg);
   });
 
   /* ---- Materials list ---- */
