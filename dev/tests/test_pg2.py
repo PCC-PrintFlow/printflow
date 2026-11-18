@@ -14,6 +14,7 @@ with sync_playwright() as p:
         row = pg.locator("#catalogListWrap tbody tr", has_text=part).first
         print(part, "| cost:", row.locator("td").nth(3).inner_text().replace("\n"," "), "| margin:", row.locator("td").nth(5).inner_text().replace("\n"," "))
     pg.screenshot(path="pg2_cat.png", clip={"x":248,"y":250,"width":1118,"height":330})
+    pg.evaluate("document.querySelectorAll('[data-kittoggle]').forEach(function(b){ if(b.getAttribute('aria-expanded')!=='true') b.click(); })")  # kits start collapsed
     pg.locator("#catalogListWrap [data-editprod='p1']").first.click(); pg.wait_for_timeout(150)
     print("editor:", pg.inner_text("#pmSummary").replace("\n"," | "))
     pg.click("#pmCancel")

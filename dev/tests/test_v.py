@@ -11,6 +11,7 @@ with sync_playwright() as p:
     pg.evaluate("""(d)=>{ localStorage.clear(); localStorage.setItem('pcc_catalog_v1', JSON.stringify(d.catalog)); localStorage.setItem('pcc_customers_v1', JSON.stringify([d.cust])); localStorage.setItem('pcc_orders_v1', JSON.stringify(d.orders)); localStorage.setItem('pcc_materials_v1', JSON.stringify(d.mats)); localStorage.setItem('pcc_settings_v1', JSON.stringify({nextOrderNum:10, invPrefix:'PCC', nextInvNum:1005, machineRate:0.3, laborRate:20, targetMargin:50})); }""", {"catalog":catalog,"cust":cust,"orders":orders,"mats":mats})
     pg.reload(); pg.wait_for_timeout(300)
     pg.click("button[data-tab='catalog']"); pg.wait_for_timeout(150)
+    pg.evaluate("document.querySelectorAll('[data-kittoggle]').forEach(function(b){ if(b.getAttribute('aria-expanded')!=='true') b.click(); })")  # kits start collapsed
     pg.locator("#catalogListWrap [data-editprod='p1']").first.click(); pg.wait_for_timeout(150)
     print("note off:", pg.inner_text("#pmPurgeNote"), "| qty visible:", pg.is_visible("#pmPurgePer"))
     pg.check("#pmMakesPurge"); pg.wait_for_timeout(80)

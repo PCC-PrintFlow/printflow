@@ -33,6 +33,7 @@ with sync_playwright() as p:
     for r in rows: print("  ", r)
     kitid = pg.evaluate("JSON.parse(localStorage.getItem('pcc_catalog_v1')).find(p=>p.isKit).id")
     # loop prevention: edit keychain, switch to kit, options must not include the starter kit
+    pg.evaluate("document.querySelectorAll('[data-kittoggle]').forEach(function(b){ if(b.getAttribute('aria-expanded')!=='true') b.click(); })")  # kits start collapsed
     pg.locator("[data-editprod='p1']").last.click(); pg.wait_for_timeout(100)
     pg.check("#pmTypeKit"); pg.wait_for_timeout(50)
     opts = pg.eval_on_selector("#pmKit select[data-km='productId']","e=>[...e.options].map(o=>o.text)")

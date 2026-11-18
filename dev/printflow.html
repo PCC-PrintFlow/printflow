@@ -338,6 +338,11 @@
   .cat-table tr.cat-kit-row td{border-top:2px solid #cfd5db;background:#f6f9f7;}
   .cat-table tr.cat-kit-row:first-child td{border-top:0;}
   .cat-kit-name{font-weight:800;color:var(--ink);}
+  .cat-table tr[hidden]{display:none;}
+  .cat-kit-toggle{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-align:left;}
+  .cat-kit-chev{display:inline-block;width:14px;font-size:12px;color:var(--sub);transition:transform .12s;}
+  .cat-kit-toggle[aria-expanded="true"] .cat-kit-chev{transform:rotate(90deg);}
+  .cat-kit-count{font-size:12px;color:var(--sub);font-weight:600;margin-left:6px;}
   /* ---- Creators ---- */
   .sync-note{background:#fbf7ee;border:1px solid #efe2c4;border-radius:8px;padding:8px 12px;font-size:13.5px;}
   .sync-status{margin:10px 0 0;font-size:13.5px;line-height:1.5;}
@@ -4726,7 +4731,10 @@
     el.innerHTML = bits.join("");
   }
 
+  // Kits start collapsed in the catalog; the ones you open stay open while the app is running.
+  var catKitOpen;  // assigned on first render (the catalog can render during startup, before this line runs)
   function renderCatalogList(){
+    if(!catKitOpen) catKitOpen = {};
     var wrap = document.getElementById("catalogListWrap");
     var fairView = catView === "fair";
     document.getElementById("catPanelTitle").textContent = fairView ? "Craft Fair Catalog" : "Product Catalog";
@@ -4758,7 +4766,12 @@
       var extraInfo = (p.catalog==="both" ? '<span class="both-tag" title="Listed in both catalogs at the same price">In both catalogs</span>' : '')+
         (p.notes ? '<div class="cat-notes">'+escapeHtml(p.notes)+'</div>' : '');
       if(opts.kit){
-        nameCell = '<span class="cat-kit-name">'+escapeHtml(p.name)+'</span><span class="kit-tag">Kit</span>'+
+        var kitOpen = !!catKitOpen[p.id];
+        nameCell = (opts.members>0
+            ? '<button type="button" class="cat-kit-toggle" data-kittoggle="'+p.id+'" aria-expanded="'+kitOpen+'" title="Show or hide the products in this kit"><span class="cat-kit-chev" aria-hidden="true">▸</span><span class="cat-kit-name">'+escapeHtml(p.name)+'</span></button>'
+            : '<span class="cat-kit-name">'+escapeHtml(p.name)+'</span>')+
+          '<span class="kit-tag">Kit</span>'+
+          (opts.members>0 ? '<span class="cat-kit-count">'+opts.members+' product'+(opts.members===1?'':'s')+'</span>' : '')+
           (opts.members===0 ? '<div class="kit-contents">No products in this kit yet</div>' : '');
       } else if(opts.member){
         var others = kitsUsing(p.id).filter(function(k){ return k.id!==opts.parent.id; });
@@ -4769,7 +4782,8 @@
         nameCell = escapeHtml(p.name);
       }
       if(!opts.member) nameCell += extraInfo;
-      return '<tr class="'+(opts.kit?'cat-kit-row':opts.member?'cat-member-row':'')+'">'+
+      return '<tr class="'+(opts.kit?'cat-kit-row':opts.member?'cat-member-row':'')+'"'+
+        (opts.member ? ' data-kitparent="'+opts.parent.id+'"'+(catKitOpen[opts.parent.id]?'':' hidden') : '')+'>'+
         '<td>'+nameCell+'</td>'+
         '<td>'+escapeHtml(p.part||"")+'</td>'+
         '<td>'+escapeHtml(p.custPart||"")+'</td>'+
@@ -4796,6 +4810,16 @@
     html += '</tbody></table></div>';
     wrap.innerHTML = html;
 
+    wrap.querySelectorAll("[data-kittoggle]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.dataset.kittoggle, open = !catKitOpen[id];
+        catKitOpen[id] = open;
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        wrap.querySelectorAll("tr[data-kitparent]").forEach(function(tr){
+          if(tr.dataset.kitparent===id) tr.hidden = !open;
+        });
+      });
+    });
     wrap.querySelectorAll("[data-editprod]").forEach(function(btn){
       btn.addEventListener("click", function(){
         var p = catalog.find(function(x){ return x.id===btn.dataset.editprod; });

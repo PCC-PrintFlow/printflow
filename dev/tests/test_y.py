@@ -18,6 +18,7 @@ with sync_playwright() as p:
     pg.fill("#pmNotes","Vinyl cutter, matte finish.\nBest seller in red."); pg.check("#pmCatBoth"); pg.click("#pmSave"); pg.wait_for_timeout(150)
     print("business list:", names())
     # copy keychain p1 to fair
+    pg.evaluate("document.querySelectorAll('[data-kittoggle]').forEach(function(b){ if(b.getAttribute('aria-expanded')!=='true') b.click(); })")  # kits start collapsed
     pg.locator("#catalogListWrap [data-copyprod='p1']").first.click(); pg.wait_for_timeout(150)
     print("toast:", pg.inner_text("#toast"))
     pg.click("#catSwFair"); pg.wait_for_timeout(150)
