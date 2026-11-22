@@ -1,6 +1,6 @@
 # PCC PrintFlow: project handoff
 
-*Updated 2026-11-15. Carried over from the earlier Claude Project "Invoice Gneterator", where the app was built.*
+*Updated 2026-11-21. Carried over from the earlier Claude Project "Invoice Gneterator", where the app was built.*
 
 PCC PrintFlow runs Pa Chuck Creations, LLC (10819 Walnut St., Leo, IN 46765; PaChuckCreations@gmail.com), a 3D-printing business. It covers:
 
@@ -180,6 +180,22 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
 - **Numbering:** `INV-<Code>-<Year>-<N>`, `ORD-<Code>-<Year>-<N>`. Invoices have tax, due date, and Draft/Sent/Paid status.
 - **Order list:** search, item-status filter, Orders and Group-by-status views.
 - **Customers:** Business Name, Contact, Phone, E-Mail, Address. Saved details sync into orders and invoices.
+
+### Craft fair replenishment orders (2026-11-21)
+- **New Order Form → order type switch:** **Customer order** (default, unchanged) or **Craft fair replenishment** for stock made for the owner's own fair table.
+- A replenishment order needs **no customer and no invoice**:
+  - The customer panel is hidden. It is saved with the placeholder customer "Craft fair stock" and `customerId: null`.
+  - There's no Invoice / Move / Create Invoice. Item status still works, and the progress bar reads "x of y items made".
+  - It never appears in "Add items from other orders" (`readyItemsByOrder`) or in the move-item destination list.
+- **+ From catalog** opens a picker with a quantity box per item and **Add to order** adds them all at once.
+  - It lists the Craft Fair Catalog by default; a checkbox includes Product Catalog items.
+  - The same product with no colors or notes is merged into its existing line; otherwise a new line is added.
+- **+ Custom request** adds a free-text line (what to make, qty, need-by, colors, notes) for anything not in the catalog.
+- **Stored fields (all optional, no migration):** order `kind: "replenish"` (absent = customer order); item `custom: true` for custom request lines (their `productId` is `""`). Old orders, backups and the sync payload are unchanged.
+  - Order History shows "Craft fair restock / own stock" and "Stock order" in the Invoiced column.
+  - The printout and PDF say "CRAFT FAIR REPLENISHMENT" with "(custom request)" beside custom lines.
+  - Switching a form with custom requests back to Customer order asks first, and removes them.
+- Test: `test_replenish.py`. `test_fi.py` needs `/tmp/deer-ridge.csv` (not in the repo) and fails without it.
 
 ### Look & output
 - **Side menu "Workshop Dark":** charcoal #1c2220, PC logo tile, green current section.
