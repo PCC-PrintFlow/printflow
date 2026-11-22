@@ -1,5 +1,5 @@
-// PCC PrintFlow offline worker. Version: 2026.11.18-1427
-const CACHE = "printflow-2026.11.18-1427";
+// PCC PrintFlow offline worker. Version: 2026.11.21-2228
+const CACHE = "printflow-2026.11.21-2228";
 const ASSETS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
