@@ -197,6 +197,13 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
   - Switching a form with custom requests back to Customer order asks first, and removes them.
 - Test: `test_replenish.py`. `test_fi.py` needs `/tmp/deer-ridge.csv` (not in the repo) and fails without it.
 
+### Supply Ordering (2026-11-22)
+- **Records → Supply Ordering:** every Bambu Lab and CookieCad PLA color (about 227) with an approximate swatch, grouped by supplier and finish line.
+- **Tick = needs ordered.** A ticked color shows a spool **Qty** box (default 1). The summary shows colors needing order and total spools. Filters: supplier, search, Needs ordered only, New only. **Copy order list** builds a text list by supplier and line ("Basic: Bambu Green x4"); sold-out colors are marked.
+- **Storage:** new key `pcc_supply_v1`, `{itemId: qty}` with itemId = `supplier|line|name`. It is in Export Backup, `applyBackupData` (a backup without it clears it, like the other collections), Push/Pull and Erase All Data. `syncDataObject()` adds `supply` only when it isn't empty, so existing devices' sync hash and payload are unchanged (no migration).
+- **Color list:** the `SUPPLY_CATALOG` array between the `SUPPLY-CATALOG-START/END` comments in `dev/printflow.html`. Row: `[supplier "B"|"C", line, name, hex colors, firstSeen, note]`. To update: append new colors with today's date as `firstSeen`, set `note` to "No longer listed" / "Sold out" as needed, never delete rows or change `firstSeen`, and set `SUPPLY_CHECKED`. A color shows **New** for `SUPPLY_NEW_DAYS` (35) days after `firstSeen`; the starting list has none. Sources: cookiecad.com/collections/3d-printer-filament (PLA entries only) and simplyprint.io/filaments/bambu-lab/<line> (hex codes are best guesses from the color names). Not listed: Bambu PLA Tough, Pure, Lite, PLA-CF.
+- Tests: `test_supply.py`, plus supply checks in `test_pwa.py`.
+
 ### Look & output
 - **Side menu "Workshop Dark":** charcoal #1c2220, PC logo tile, green current section.
   - **Work:** New Order Form, Order Forms, Invoices, Craft Fairs.
@@ -209,7 +216,7 @@ The owner now works in the **installed app**. The Claude artifact is a preview/t
 ## Open items / ideas
 - Creator fees aren't included in product costs (a per-piece licensing share could be added). Sales (12 mo) misses kits containing a creator's products unless the kit itself is tied to the creator.
 - Filament choice swaps material price only. "Both" items share one price.
-- No on-hand inventory yet.
+- No on-hand inventory yet (Supply Ordering only tracks what to order, not what's on the shelf).
 - Older invoice lines without order links show no order refs.
 - Possible next steps:
   - Inventory.
