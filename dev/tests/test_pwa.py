@@ -34,6 +34,7 @@ with sync_playwright() as p:
     A = ctxA.new_page(); A.on("pageerror", lambda e: errs.append("A:"+str(e))); A.on("console", lambda m: errs.append("A:"+m.text) if m.type=="error" else None)
     A.goto(URL); A.wait_for_timeout(500)
     A.evaluate("""(d)=>{ localStorage.setItem('pcc_catalog_v1', JSON.stringify(d.catalog)); localStorage.setItem('pcc_customers_v1', JSON.stringify([d.cust])); localStorage.setItem('pcc_orders_v1', JSON.stringify(d.orders)); localStorage.setItem('pcc_materials_v1', JSON.stringify(d.mats)); }""", {"catalog":catalog,"cust":cust,"orders":orders,"mats":mats})
+    A.evaluate("localStorage.setItem('pcc_supply_v1', JSON.stringify({'B|PLA Basic|Bambu Green':2}))")
     A.reload(); A.wait_for_timeout(800)
     print("standalone:", A.evaluate("window.PCC_STANDALONE"), "| version:", A.evaluate("window.PCC_APP_VERSION"))
     print("sw controller:", A.evaluate("navigator.serviceWorker.controller ? 'yes' : 'no'"), "| manifest link:", A.evaluate("!!document.querySelector('link[rel=manifest]')"))
@@ -66,6 +67,7 @@ with sync_playwright() as p:
     A.click("#syncPushBtn"); A.wait_for_timeout(800); print("push:", A.inner_text("#toast"), "| puts:", REMOTE["puts"])
     print("status A:", A.inner_text("#syncStatus").replace("\n"," | "))
     print("token not in payload:", "good-token" not in REMOTE["file"], "| pcc_sync not in payload:", "pcc_sync" not in REMOTE["file"])
+    assert json.loads(REMOTE["file"])["data"]["supply"] == {'B|PLA Basic|Bambu Green':2}, "supply orders should travel in the push"
     # ---------- Device B ("iPad") ----------
     ctxB = b.new_context(viewport={"width":820,"height":1180}, accept_downloads=True)
     ctxB.route("https://api.github.com/**", gh)
@@ -77,6 +79,7 @@ with sync_playwright() as p:
     print("B pull confirm:", B.inner_text("#confirmText")[:160])
     B.click("#confirmOk"); B.wait_for_timeout(400)
     print("B orders after pull:", B.evaluate("JSON.parse(localStorage.getItem('pcc_orders_v1')).length"), "| B token kept:", B.evaluate("JSON.parse(localStorage.getItem('pcc_sync_v1')).token==='good-token'"))
+    assert B.evaluate("JSON.parse(localStorage.getItem('pcc_supply_v1'))") == {'B|PLA Basic|Bambu Green':2}, "supply orders should arrive with a pull"
     # B logs a fair sale and pushes
     B.click("button[data-tab='fairs']"); B.wait_for_timeout(200); B.click("[data-fprice='5']"); B.wait_for_timeout(100)
     B.click("button[data-tab='settings']"); B.wait_for_timeout(150)

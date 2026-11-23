@@ -373,6 +373,26 @@
   #syncPanel .btn:disabled{opacity:.45;cursor:not-allowed;}
   .cr-summary{display:flex;gap:24px;align-items:baseline;flex-wrap:wrap;margin:6px 0 14px;padding:10px 14px;background:#f6faf7;border:1px solid #d7e8dd;border-radius:8px;font-size:14px;}
   .cr-big{font-size:22px;font-weight:800;color:#245a3f;font-variant-numeric:tabular-nums;}
+  .sup-bar{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin:10px 0 14px;}
+  .sup-bar .search{max-width:220px;margin:0;}
+  .sup-bar select{width:auto;min-width:170px;margin:0;}
+  .sup-bar label.sup-chk{display:flex;align-items:center;gap:6px;font-size:13.5px;cursor:pointer;}
+  .sup-group{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;background:#fff;}
+  .sup-group>summary{cursor:pointer;padding:10px 12px;font-weight:700;display:flex;gap:8px;align-items:baseline;}
+  .sup-group>summary .sup-cnt{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--sub);}
+  .sup-head{font-size:15px;margin:18px 0 8px;} .sup-head small{font-weight:400;color:var(--sub);}
+  .sup-row{display:flex;align-items:center;gap:10px;padding:6px 12px;border-top:1px solid var(--line);min-height:44px;cursor:pointer;}
+  .sup-row.on{background:var(--accent-light);}
+  .sup-row input[type=checkbox]{width:20px;height:20px;flex:none;accent-color:var(--accent);}
+  .sup-sw{width:28px;height:28px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.25);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);}
+  .sup-nm{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .sup-badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+  .sup-new{background:#fde8c8;color:#9a4a07;} .sup-note{background:var(--danger-light);color:var(--danger);}
+  .sup-qty{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sub);}
+  .sup-qty input{width:68px;padding:5px 6px;text-align:center;}
+  .sup-tools{border-top:1px solid var(--line);padding:4px 12px;display:flex;gap:14px;}
+  .sup-tools button{border:0;background:none;color:var(--accent-dark);font:inherit;font-size:12.5px;cursor:pointer;padding:4px 0;}
+  #supOrderText{display:none;width:100%;min-height:130px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;}
   .cr-add{margin-bottom:12px;}
   .cr-style{grid-column:1/-1;max-width:260px;}
   .cr-id{display:inline-block;padding:2px 8px;border-radius:5px;background:#e7eef9;color:#244a7a;font-weight:800;font-size:13px;letter-spacing:.02em;}
@@ -596,6 +616,7 @@
       <button type="button" data-tab="catalog"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span>Product Catalog</span></button>
       <button type="button" data-tab="creators"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg><span>Creators</span></button>
       <button type="button" data-tab="materials"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>Materials</span></button>
+      <button type="button" data-tab="supply"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg><span>Supply Ordering</span></button>
       <div class="side-spacer"></div>
       <div class="side-foot"><button type="button" data-tab="settings"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Settings</span></button></div>
     </nav>
@@ -931,6 +952,24 @@
         <div class="field" style="align-self:end;"><button class="btn secondary" id="crAddBtn" type="button">Add Creator</button></div>
       </div>
       <div id="creatorListWrap"></div>
+    </div>
+  </section>
+
+  <!-- ============ SUPPLY ORDERING TAB ============ -->
+  <section id="tab-supply" style="display:none;">
+    <div class="panel">
+      <h2>Supply Ordering</h2>
+      <p class="muted">Every Bambu Lab and CookieCad PLA color. Tick a color that needs to be ordered and set how many spools. Swatches are approximate screen colors. The list was last checked <span id="supChecked"></span>, and new colors are marked New for about a month.</p>
+      <div class="cr-summary" id="supSummary"></div>
+      <div class="sup-bar">
+        <select id="supSup" aria-label="Supplier"><option value="all">All suppliers</option><option value="B">Bambu Lab</option><option value="C">CookieCad</option></select>
+        <input type="text" class="search" id="supSearch" placeholder="Search colors..." aria-label="Search colors">
+        <label class="sup-chk"><input type="checkbox" id="supNeedOnly"> Needs ordered only</label>
+        <label class="sup-chk"><input type="checkbox" id="supNewOnly"> New only</label>
+        <button class="btn secondary" id="supCopyBtn" type="button">Copy order list</button>
+      </div>
+      <textarea id="supOrderText" readonly aria-label="Order list"></textarea>
+      <div id="supList"></div>
     </div>
   </section>
 
@@ -1486,7 +1525,8 @@
     orders: "pcc_orders_v1",
     materials: "pcc_materials_v1",
     fairs: "pcc_fairs_v1",
-    creators: "pcc_creators_v1"
+    creators: "pcc_creators_v1",
+    supply: "pcc_supply_v1"
   };
 
   function load(key, fallback){
@@ -1601,6 +1641,8 @@
   if(!Array.isArray(fairs.history)) fairs.history = [];
   // Creators: first time, start with the owner's three subscriptions (fees to fill in) and link
   // existing products whose names already start with their ID.
+  var supply = load(STORE.supply, null);   /* Supply Ordering: {itemId: spools to order}; absent = not needed */
+  if(!supply || typeof supply !== "object" || Array.isArray(supply)) supply = {};
   var creators = load(STORE.creators, null);
   if(!Array.isArray(creators)){
     creators = [
@@ -2092,6 +2134,7 @@
     save(STORE.materials, materials);
     save(STORE.fairs, fairs);
     save(STORE.creators, creators);
+    save(STORE.supply, supply);
   }
 
   /* ---------------- Toast ---------------- */
@@ -2188,6 +2231,7 @@
     materials: document.getElementById("tab-materials"),
     fairs: document.getElementById("tab-fairs"),
     creators: document.getElementById("tab-creators"),
+    supply: document.getElementById("tab-supply"),
     settings: document.getElementById("tab-settings")
   };
   function switchToTab(key){
@@ -2206,6 +2250,7 @@
     tabSections[key].style.display = "block";
     if(key==="fairs" && typeof renderFairs === "function") renderFairs();
     if(key==="creators" && typeof renderCreators === "function") renderCreators();
+    if(key==="supply" && typeof renderSupply === "function") renderSupply();
     if(key === "invoices") renderInvoiceList();
     if(key === "orders") renderOrderList();
     if(key === "neworder") renderOrderLineItems();
@@ -6500,7 +6545,9 @@
   var syncCfg = load(SYNC_KEY, {}) || {};
   function saveSyncCfg(){ save(SYNC_KEY, syncCfg); }
   function syncDataObject(){
-    return {settings:settings, customers:customers, catalog:catalog, materials:materials, invoices:invoices, orders:orders, fairs:fairs, creators:creators};
+    var o = {settings:settings, customers:customers, catalog:catalog, materials:materials, invoices:invoices, orders:orders, fairs:fairs, creators:creators};
+    if(Object.keys(supply).length) o.supply = supply;   /* only when used, so existing devices' sync hash is unchanged */
+    return o;
   }
   function hashText(t){ var h = 5381; for(var i=0;i<t.length;i++){ h = ((h<<5) + h + t.charCodeAt(i)) | 0; } return (h>>>0).toString(36) + ":" + t.length; }
   function localDataHash(){ return hashText(JSON.stringify(syncDataObject())); }
@@ -6651,7 +6698,7 @@
 
   /* ---- Backup / restore ---- */
   document.getElementById("exportDataBtn").addEventListener("click", function(){
-    var payload = {settings:settings, customers:customers, catalog:catalog, materials:materials, invoices:invoices, orders:orders, fairs:fairs, creators:creators, exportedAt:new Date().toISOString()};
+    var payload = {settings:settings, customers:customers, catalog:catalog, materials:materials, invoices:invoices, orders:orders, fairs:fairs, creators:creators, supply:supply, exportedAt:new Date().toISOString()};
     var text = JSON.stringify(payload, null, 2);
     var filename = "pcc-printflow-backup-"+todayISO()+".json";
     if(window.PCC_STANDALONE || (window.claude && typeof window.claude.use === "function")){
@@ -6677,7 +6724,7 @@
     reader.onload = function(){
       try{
         var data = JSON.parse(reader.result);
-        askConfirm("Import backup?", "This will replace all current customers, catalog items, creators, materials, invoices, order forms, craft fairs and settings in this browser.", function(){
+        askConfirm("Import backup?", "This will replace all current customers, catalog items, creators, materials, supply orders, invoices, order forms, craft fairs and settings in this browser.", function(){
           applyBackupData(data);
           toast("Backup imported.");
         });
@@ -6697,6 +6744,7 @@
           materials = data.materials||[];
           if(data.fairs && data.fairs.current){ fairs = data.fairs; if(!Array.isArray(fairs.history)) fairs.history = []; }
           if(Array.isArray(data.creators)) creators = data.creators;
+          supply = (data.supply && typeof data.supply === "object" && !Array.isArray(data.supply)) ? data.supply : {};
           materials.forEach(migrateMaterial);
           catalog.forEach(migrateProductCost);
           customers.forEach(migrateCustomerFields);
@@ -6714,6 +6762,7 @@
           newBlankOrderForm(true);
           if(typeof renderFairs === "function") renderFairs();
           if(typeof renderCreators === "function") renderCreators();
+          if(typeof renderSupply === "function") renderSupply();
           if(typeof renderCatalogList === "function") renderCatalogList();
   }
   document.getElementById("wipeDataBtn").addEventListener("click", function(){
@@ -6726,6 +6775,7 @@
       materials = [];
       fairs = {current:newFairState(), history:[]};
       creators = [];
+      supply = {};
       persistAll();
       if(typeof renderFairs === "function") renderFairs();
       renderHeaderBizInfo();
@@ -6735,6 +6785,366 @@
       toast("All data erased.");
     });
   });
+
+  /* ---------------- Supply ordering ---------------- */
+  /* SUPPLY-CATALOG-START
+     Weekly-updated list of Bambu Lab and CookieCad PLA colors. Row: [supplier "B"|"C", line, name,
+     hex colors (comma separated, no #), firstSeen "YYYY-MM-DD" or "" for the starting list, note].
+     Add new colors at the end with today's date as firstSeen; never delete rows or change firstSeen
+     (a color that is dropped gets the note "No longer listed"). New shows for SUPPLY_NEW_DAYS days. */
+  var SUPPLY_CHECKED = "2026-11-22";
+  var SUPPLY_NEW_DAYS = 35;
+  var SUPPLY_CATALOG = [
+["B","PLA Basic","Bambu Green","00AE42","",""],
+["B","PLA Basic","Beige","F7E6DE","",""],
+["B","PLA Basic","Black","111111","",""],
+["B","PLA Basic","Blue","0A2989","",""],
+["B","PLA Basic","Blue Gray","5B6579","",""],
+["B","PLA Basic","Bright Green","5EC04A","",""],
+["B","PLA Basic","Bronze","847D48","",""],
+["B","PLA Basic","Brown","9D432C","",""],
+["B","PLA Basic","Cobalt Blue","0056B8","",""],
+["B","PLA Basic","Cocoa Brown","6F5034","",""],
+["B","PLA Basic","Cyan","0086D6","",""],
+["B","PLA Basic","Dark Gray","545454","",""],
+["B","PLA Basic","Gold","E4BD68","",""],
+["B","PLA Basic","Gray","8E9089","",""],
+["B","PLA Basic","Green","3F8E43","",""],
+["B","PLA Basic","Hot Pink","F5547C","",""],
+["B","PLA Basic","Indigo Purple","482960","",""],
+["B","PLA Basic","Jade White","F2F2EE","",""],
+["B","PLA Basic","Light Gray","D1D3D5","",""],
+["B","PLA Basic","Magenta","EC008C","",""],
+["B","PLA Basic","Maroon Red","9D2235","",""],
+["B","PLA Basic","Mistletoe Green","3C6E47","",""],
+["B","PLA Basic","Orange","FF6A13","",""],
+["B","PLA Basic","Pink","F4A0B9","",""],
+["B","PLA Basic","Pumpkin Orange","FF9016","",""],
+["B","PLA Basic","Purple","5E43B7","",""],
+["B","PLA Basic","Red","C12E1F","",""],
+["B","PLA Basic","Silver","A6A9AA","",""],
+["B","PLA Basic","Sunflower Yellow","FEC600","",""],
+["B","PLA Basic","Turquoise","00B1B7","",""],
+["B","PLA Basic","Yellow","F4EE2A","",""],
+["B","PLA Matte","Apple Green","C2E189","",""],
+["B","PLA Matte","Ash Gray","9B9EA0","",""],
+["B","PLA Matte","Bone White","CBC6B8","",""],
+["B","PLA Matte","Caramel","AE835B","",""],
+["B","PLA Matte","Charcoal","2B2B2B","",""],
+["B","PLA Matte","Dark Blue","042F56","",""],
+["B","PLA Matte","Dark Brown","7D6556","",""],
+["B","PLA Matte","Dark Chocolate","4D3324","",""],
+["B","PLA Matte","Dark Green","68724D","",""],
+["B","PLA Matte","Dark Red","BB3D43","",""],
+["B","PLA Matte","Desert Tan","E8DBB7","",""],
+["B","PLA Matte","Grass Green","61C680","",""],
+["B","PLA Matte","Ice Blue","A3D8E1","",""],
+["B","PLA Matte","Ivory White","F4F1E8","",""],
+["B","PLA Matte","Latte Brown","D3B7A7","",""],
+["B","PLA Matte","Lemon Yellow","F7D959","",""],
+["B","PLA Matte","Lilac Purple","AE96D4","",""],
+["B","PLA Matte","Mandarin Orange","F99963","",""],
+["B","PLA Matte","Marine Blue","0078BF","",""],
+["B","PLA Matte","Nardo Grey","757575","",""],
+["B","PLA Matte","Plum","950051","",""],
+["B","PLA Matte","Sakura Pink","E8AFCF","",""],
+["B","PLA Matte","Scarlet Red","DE4343","",""],
+["B","PLA Matte","Sky Blue","7CC4D6","",""],
+["B","PLA Matte","Terracotta","A25A37","",""],
+["B","PLA Silk+","Baby Blue","A8C2EB","",""],
+["B","PLA Silk+","Blue","008BDA","",""],
+["B","PLA Silk+","Candy Green","018814","",""],
+["B","PLA Silk+","Candy Red","D02727","",""],
+["B","PLA Silk+","Champagne","F3E3C0","",""],
+["B","PLA Silk+","Gold","E4BD68","",""],
+["B","PLA Silk+","Mint","96DCB9","",""],
+["B","PLA Silk+","Pink","F4A6B8","",""],
+["B","PLA Silk+","Purple","8671CB","",""],
+["B","PLA Silk+","Rose Gold","B87F6A","",""],
+["B","PLA Silk+","Silver","C8C8C8","",""],
+["B","PLA Silk+","Titan Gray","7F8387","",""],
+["B","PLA Silk+","White","F5F5F5","",""],
+["B","PLA Silk","Copper","C47E4D","",""],
+["B","PLA Silk","Green","3FA34D","",""],
+["B","PLA Silk","Cobalt Blue Metallic","1F4E9E","",""],
+["B","PLA Silk","Oxide Green Metallic","3E6B55","",""],
+["B","PLA Silk Dual Color","Aurora Purple","7B5AC8,2F6FD6","",""],
+["B","PLA Silk Dual Color","Blue Hawaii (blue-green)","1E88E5,2EB872","",""],
+["B","PLA Silk Dual Color","Dawn Radiance","F2A3B8,F6C26B","",""],
+["B","PLA Silk Dual Color","Gilded Rose (pink-gold)","E8A0B4,D9B15F","",""],
+["B","PLA Silk Dual Color","Midnight Blaze (blue-red)","1D3FA8,D1322E","",""],
+["B","PLA Silk Dual Color","Mystic Magenta (green-purple)","2EB872,A33AC9","",""],
+["B","PLA Silk Dual Color","Neon City (blue-magenta)","2D6BDB,E0309B","",""],
+["B","PLA Silk Dual Color","Phantom Blue (blue-black)","2D6BDB,111111","",""],
+["B","PLA Silk Dual Color","South Beach","29B6C9,F28AA0","",""],
+["B","PLA Silk Dual Color","Velvet Eclipse (black-red)","111111,B3202A","",""],
+["B","PLA Metal","Cobalt Blue","1F4E9E","",""],
+["B","PLA Metal","Copper Brown","9A5B36","",""],
+["B","PLA Metal","Iridium Gold","B8A15A","",""],
+["B","PLA Metal","Iron Gray","6B6F73","",""],
+["B","PLA Metal","Oxide Green","3E6B55","",""],
+["B","PLA Galaxy","Brown","6B4A3A","",""],
+["B","PLA Galaxy","Green","2F6B52","",""],
+["B","PLA Galaxy","Nebulae","3B2A6E,1E5FA8","",""],
+["B","PLA Galaxy","Purple","5B3E8F","",""],
+["B","PLA Sparkle","Alpine Green Sparkle","2E5E4E","",""],
+["B","PLA Sparkle","Classic Gold Sparkle","C9A44C","",""],
+["B","PLA Sparkle","Crimson Red Sparkle","A8232F","",""],
+["B","PLA Sparkle","Onyx Black Sparkle","1A1A1A","",""],
+["B","PLA Sparkle","Royal Purple Sparkle","5A3E9A","",""],
+["B","PLA Sparkle","Slate Gray Sparkle","5F6770","",""],
+["B","PLA Marble","Red Granite","9A5A52","",""],
+["B","PLA Marble","White Marble","E4E2DD","",""],
+["B","PLA Translucent","Blue","2B6CC4","",""],
+["B","PLA Translucent","Cherry Pink","E65C8A","",""],
+["B","PLA Translucent","Ice Blue","A9DCEB","",""],
+["B","PLA Translucent","Lavender","B9A4E0","",""],
+["B","PLA Translucent","Light Jade","9BD4B0","",""],
+["B","PLA Translucent","Mellow Yellow","F2DC6B","",""],
+["B","PLA Translucent","Orange","F28A30","",""],
+["B","PLA Translucent","Purple","7A4FC0","",""],
+["B","PLA Translucent","Red","D13A3A","",""],
+["B","PLA Translucent","Teal","1FA8A0","",""],
+["B","PLA Basic Gradient","Arctic Whisper","B8E0F0,E8EEF5","",""],
+["B","PLA Basic Gradient","Blueberry Bubblegum","4A6FD8,F29BC5","",""],
+["B","PLA Basic Gradient","Cotton Candy Cloud","F5A9D0,9BC7F2","",""],
+["B","PLA Basic Gradient","Dusk Glare","3F4C9E,F08A5D","",""],
+["B","PLA Basic Gradient","Mint Lime","8FE3B8,C8F04D","",""],
+["B","PLA Basic Gradient","Ocean to Meadow","2D7DD2,7CCB6B","",""],
+["B","PLA Basic Gradient","Pink Citrus","F28BB0,F7C948","",""],
+["B","PLA Basic Gradient","Solar Breeze","F7D45A,F28A5A","",""],
+["B","PLA Aero","Gray","8A8D90","",""],
+["B","PLA Aero","White","F2F2F2","",""],
+["B","PLA Glow","Blue","6FB6F2","",""],
+["B","PLA Glow","Green","9BE28A","",""],
+["B","PLA Glow","Orange","F7A45A","",""],
+["B","PLA Glow","Pink","F4A1C4","",""],
+["B","PLA Glow","Yellow","F2E36B","",""],
+["B","PLA Tough+","Black","1A1A1A","",""],
+["B","PLA Tough+","Cyan","00A6D6","",""],
+["B","PLA Tough+","Gold","D4A94A","",""],
+["B","PLA Tough+","Gray","8A8D90","",""],
+["B","PLA Tough+","Orange","F26B21","",""],
+["B","PLA Tough+","Silver","B5B8BB","",""],
+["B","PLA Tough+","White","F2F2F2","",""],
+["B","PLA Tough+","Yellow","F2D21B","",""],
+["B","PLA Wood","Black Walnut","4A3426","",""],
+["B","PLA Wood","Classic Birch","D8BE96","",""],
+["B","PLA Wood","Clay Brown","8A5A3C","",""],
+["B","PLA Wood","Ochre Yellow","C9953A","",""],
+["B","PLA Wood","Rosewood","6B2E2A","",""],
+["B","PLA Wood","White Oak","CDB38B","",""],
+["C","Solid","Black","111111","",""],
+["C","Solid","White","F7F7F7","",""],
+["C","Solid","Bubblegum","F59BC3","",""],
+["C","Solid","Candy Apple Red","C2182B,E8433A","",""],
+["C","Solid","Coral","F4796B","","Sold out"],
+["C","Solid","Green Apple","8FD14F","",""],
+["C","Solid","Hot Pink","F0338D","",""],
+["C","Solid","Lavender","B9A3E3","",""],
+["C","Solid","Mint Green","9FE0C0","","Sold out"],
+["C","Solid","Orange Sorbet","F7A456","",""],
+["C","Solid","Pale Blue Dot","B7D9F2","",""],
+["C","Solid","Pale Pink","F6C9D6","",""],
+["C","Solid","Pale Yellow","F7EBA0","",""],
+["C","Solid","Periwinkle","8E9BEA","",""],
+["C","Solid","Pumpkin Spice","D9772B","","Limited time"],
+["C","Elixir (silk)","Bubblegum Elixir","F59BC3","","Sold out"],
+["C","Elixir (silk)","Green Apple Elixir","8FD14F","",""],
+["C","Elixir (silk)","Lavender Elixir","B9A3E3","",""],
+["C","Elixir (silk)","Magenta Elixir","D41C86","",""],
+["C","Elixir (silk)","Mint Green Elixir","A6E3C4","",""],
+["C","Elixir (silk)","Orange Elixir","F28A30","",""],
+["C","Elixir (silk)","Pale Blue Elixir","A9D6F2","",""],
+["C","Elixir (silk)","Pale Pink Elixir","F6C9D6","",""],
+["C","Elixir (silk)","Ruby Red Elixir","B3122D","",""],
+["C","Elixir (silk)","Solar Flare Elixir","F2542D,F7A21B","",""],
+["C","Elixir (silk)","Teal Elixir","1FA39A","",""],
+["C","Elixir (silk)","Pixie Dust Elixir","F4A3D4,9BD1F5","",""],
+["C","Color change / rainbow","Fairy Floss","F5A0C8,B79BE8,8EC5F2","",""],
+["C","Color change / rainbow","Mermaid","8E5BD0,2BB5A0,3A7BD5","",""],
+["C","Color change / rainbow","Mermaid Elixir","8E5BD0,2BB5A0,3A7BD5","",""],
+["C","Color change / rainbow","Pastel Rainbow","F7B7CF,F7EBA0,BFEBD3,B7D9F2,CDB8EC","",""],
+["C","Color change / rainbow","Pastel Rainbow Elixir","F7B7CF,F7EBA0,BFEBD3,B7D9F2,CDB8EC","",""],
+["C","Color change / rainbow","Sunrise","F28BB0,F7A04A,F7D95A","",""],
+["C","Color change / rainbow","Sunrise Elixir","F28BB0,F7A04A,F7D95A","",""],
+["C","Color change / rainbow","Sunset","1F2F8F,7B3FB0,D0359A","",""],
+["C","Color change / rainbow","Sunset Elixir","1F2F8F,7B3FB0,D0359A","",""],
+["C","Color change / rainbow","Unicorn","F28BC0,6BA8F2,A57BE0","",""],
+["C","Color change / rainbow","Unicorn Elixir","F28BC0,6BA8F2,A57BE0","",""],
+["C","Ombré","Blue Ombré","A5D5F5,2F6FD6","",""],
+["C","Ombré","Blue Ombré Elixir","A5D5F5,2F6FD6","",""],
+["C","Ombré","Gray Ombré","D0D3D6,5A5F66","",""],
+["C","Ombré","Pink Ombré","F7B7CF,E0539A","",""],
+["C","Ombré","Pink Ombré Elixir","F7B7CF,E0539A","",""],
+["C","Ombré","Purple Ombré","D6B3F0,7B3FB0","",""],
+["C","Ombré","Purple Ombré Elixir","D6B3F0,7B3FB0","",""],
+["C","Silk","Silk Granite","7A7F85","",""],
+["C","Silk","Silk Mermaid","8E5BD0,2BB5A0,3A7BD5","",""],
+["C","Silk","Silk Mermaid (dual color)","8E5BD0,2BB5A0","",""],
+["C","Silk","Silk Pastel Rainbow","F7B7CF,F7EBA0,BFEBD3,B7D9F2","",""],
+["C","Silk","Silk Pink Ombré","F7B7CF,E0539A","",""],
+["C","Silk","Silk Silver Ombré","E0E3E6,8C9096","",""],
+["C","Silk","Silk Sunrise","F28BB0,F7A04A,F7D95A","",""],
+["C","Silk","Silk Sunrise (dual color)","F28BB0,F7D95A","",""],
+["C","Silk","Silk Sunset","1F2F8F,7B3FB0,D0359A","",""],
+["C","Silk","Silk Sunset (dual color)","1F2F8F,D0359A","",""],
+["C","Silk","Silk Unicorn","F28BC0,6BA8F2,A57BE0","",""],
+["C","Silk","Silk Unicorn (dual color)","F28BC0,6BA8F2","",""],
+["C","Pearl / iridescent","Blue Pearl","A7C8F0","",""],
+["C","Pearl / iridescent","Gold Pearl","E3C98C","",""],
+["C","Pearl / iridescent","Pink Pearl","F3C1D0","",""],
+["C","Pearl / iridescent","Moonstone","BFC9D9,E8E4F2","",""],
+["C","Pearl / iridescent","Witchcraft","6A3FA0,1FA39A","",""],
+["C","Pearl / iridescent","Witches Blue","1D4FD8,0E9AA7","",""],
+["C","Pearl / iridescent","Dark Magic","2B1B3D,5B3A8C","",""],
+["C","Pearl / iridescent","Midnight Magic","1B1F4A,3A4BB0","",""],
+["C","Pearl / iridescent","Nightshade","2B1B4A","","Sold out"],
+["C","Star Stuff / glitter","Black Star Stuff","15151C","",""],
+["C","Star Stuff / glitter","Blue Star Stuff","2F6FD6","",""],
+["C","Star Stuff / glitter","Mint Star Stuff","7ED6A8","",""],
+["C","Star Stuff / glitter","Pink Star Stuff","F28CBB","",""],
+["C","Star Stuff / glitter","Purple Star Stuff","7B4FC4","",""],
+["C","Star Stuff / glitter","Star Dust","1A1A22","",""],
+["C","Star Stuff / glitter","Gold Dust","E3C770","",""],
+["C","Star Stuff / glitter","Funfetti Clear","E8F0F4","","Sold out"],
+["C","Marble / chip","Blue Chip","BFD9F2","",""],
+["C","Marble / chip","Lavender Chip","CDB8EC","",""],
+["C","Marble / chip","Mint Chip","BFEBD3","",""],
+["C","Marble / chip","Pink Chip","F6C0D4","","Sold out"],
+["C","Marble / chip","Vanilla Chip","F2E6D0","",""],
+["C","Marble / chip","Vanilla Blueberry","E8DDF0,4F5FB5","",""],
+["C","Marble / chip","Vanilla Redberry","F2E6E0,B5283A","",""],
+["C","Mixer","Granite Mixer","8A8F95","",""],
+["C","Mixer","Mermaid Mixer","8E5BD0,2BB5A0","",""],
+["C","Mixer","Sunrise Mixer","F28BB0,F7D95A","",""],
+["C","Mixer","Sunset Mixer","1F2F8F,D0359A","",""],
+["C","Mixer","Unicorn Mixer","F28BC0,6BA8F2","",""],
+["C","Fast change (500 g)","Fast Mermaid","8E5BD0,2BB5A0","","500 g"],
+["C","Fast change (500 g)","Fast Unicorn","F28BC0,6BA8F2","","500 g"]
+];
+  /* SUPPLY-CATALOG-END */
+  var SUPPLY_NAMES = {B:"Bambu Lab", C:"CookieCad"};
+  var supplyItems = SUPPLY_CATALOG.map(function(r){
+    return {id:r[0]+"|"+r[1]+"|"+r[2], s:r[0], line:r[1], name:r[2], colors:r[3].split(","), first:r[4], note:r[5]};
+  });
+  var supplyState = {sup:"all", q:"", needOnly:false, newOnly:false};
+  var supplyOpen = {};
+  function supplyIsNew(it){
+    if(!it.first) return false;
+    var age = (Date.now() - new Date(it.first + "T00:00:00").getTime()) / 86400000;
+    return age >= 0 && age < SUPPLY_NEW_DAYS;
+  }
+  function supplyBg(cols){ return cols.length === 1 ? "#"+cols[0] : "linear-gradient(135deg,"+cols.map(function(c){ return "#"+c; }).join(",")+")"; }
+  function supplyVisible(it){
+    if(supplyState.sup !== "all" && it.s !== supplyState.sup) return false;
+    if(supplyState.q && (it.name+" "+it.line).toLowerCase().indexOf(supplyState.q) < 0) return false;
+    if(supplyState.needOnly && !supply[it.id]) return false;
+    if(supplyState.newOnly && !supplyIsNew(it)) return false;
+    return true;
+  }
+  function renderSupplySummary(){
+    var ids = supplyItems.filter(function(i){ return supply[i.id]; });
+    var spools = ids.reduce(function(n, i){ return n + (supply[i.id] || 1); }, 0);
+    var nw = supplyItems.filter(supplyIsNew).length;
+    document.getElementById("supSummary").innerHTML = '<div><span class="cr-big">'+ids.length+'</span> need ordered</div><div><span class="cr-big">'+spools+'</span> spools</div><div class="muted">'+nw+' new color'+(nw===1?'':'s')+' · '+supplyItems.length+' colors listed</div>';
+  }
+  function renderSupply(){
+    var wrap = document.getElementById("supList");
+    if(!wrap) return;
+    document.getElementById("supChecked").textContent = new Date(SUPPLY_CHECKED + "T12:00:00").toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"});
+    renderSupplySummary();
+    var html = "", shown = 0;
+    ["B","C"].forEach(function(sup){
+      var mine = supplyItems.filter(function(i){ return i.s === sup && supplyVisible(i); });
+      if(!mine.length) return;
+      var allSup = supplyItems.filter(function(i){ return i.s === sup; });
+      html += '<h3 class="sup-head">'+SUPPLY_NAMES[sup]+' <small>'+allSup.filter(function(i){ return supply[i.id]; }).length+' need ordered · '+allSup.length+' colors</small></h3>';
+      var lines = [];
+      mine.forEach(function(i){ if(lines.indexOf(i.line) < 0) lines.push(i.line); });
+      lines.forEach(function(line){
+        var rows = mine.filter(function(i){ return i.line === line; });
+        var all = allSup.filter(function(i){ return i.line === line; });
+        var key = sup+"|"+line;
+        var open = (key in supplyOpen) ? supplyOpen[key] : true;
+        var need = all.filter(function(i){ return supply[i.id]; }).length, nw = all.filter(supplyIsNew).length;
+        html += '<details class="sup-group" data-gkey="'+escapeHtml(key)+'"'+(open?' open':'')+'><summary>'+escapeHtml(line)+'<span class="sup-cnt">'+(nw?nw+' new · ':'')+(need?need+' to order · ':'')+all.length+'</span></summary>';
+        rows.forEach(function(it){
+          shown++;
+          var idx = supplyItems.indexOf(it), q = supply[it.id];
+          html += '<label class="sup-row'+(q?' on':'')+'"><input type="checkbox" data-sup-i="'+idx+'"'+(q?' checked':'')+' aria-label="'+escapeHtml(it.name)+' needs ordered"><span class="sup-sw" style="background:'+supplyBg(it.colors)+'"></span><span class="sup-nm">'+escapeHtml(it.name)+'</span>'
+            + (supplyIsNew(it) ? '<span class="sup-badge sup-new">New</span>' : '')
+            + (it.note ? '<span class="sup-badge sup-note">'+escapeHtml(it.note)+'</span>' : '')
+            + (q ? '<span class="sup-qty">Qty <input type="number" min="1" max="999" step="1" inputmode="numeric" value="'+q+'" data-sup-q="'+idx+'" aria-label="Spools of '+escapeHtml(it.name)+'"></span>' : '')
+            + '</label>';
+        });
+        html += '<div class="sup-tools"><button type="button" data-sup-all="'+escapeHtml(key)+'">Mark all to order</button><button type="button" data-sup-clear="'+escapeHtml(key)+'">Clear</button></div></details>';
+      });
+    });
+    if(!shown) html = '<div class="empty">No colors match these filters.</div>';
+    wrap.innerHTML = html;
+  }
+  function supplyGroupRows(key){
+    var p = key.split("|");
+    return supplyItems.filter(function(i){ return i.s === p[0] && i.line === p[1] && supplyVisible(i); });
+  }
+  (function wireSupply(){
+    var list = document.getElementById("supList");
+    list.addEventListener("change", function(e){
+      var t = e.target;
+      if(t.hasAttribute("data-sup-i")){
+        var it = supplyItems[+t.getAttribute("data-sup-i")];
+        if(t.checked) supply[it.id] = supply[it.id] || 1; else delete supply[it.id];
+        save(STORE.supply, supply); renderSupply();
+      }
+    });
+    list.addEventListener("input", function(e){
+      var t = e.target;
+      if(t.hasAttribute("data-sup-q")){
+        var n = parseInt(t.value, 10);
+        if(n >= 1){ supply[supplyItems[+t.getAttribute("data-sup-q")].id] = Math.min(n, 999); save(STORE.supply, supply); renderSupplySummary(); }
+      }
+    });
+    list.addEventListener("focusout", function(e){
+      var t = e.target;
+      if(t.hasAttribute("data-sup-q") && !(parseInt(t.value, 10) >= 1)) t.value = supply[supplyItems[+t.getAttribute("data-sup-q")].id] || 1;
+    });
+    list.addEventListener("click", function(e){
+      var t = e.target;
+      if(t.hasAttribute("data-sup-q")) { e.stopPropagation(); return; }
+      var all = t.getAttribute("data-sup-all"), clr = t.getAttribute("data-sup-clear");
+      if(all){ supplyGroupRows(all).forEach(function(i){ supply[i.id] = supply[i.id] || 1; }); save(STORE.supply, supply); renderSupply(); }
+      if(clr){ supplyGroupRows(clr).forEach(function(i){ delete supply[i.id]; }); save(STORE.supply, supply); renderSupply(); }
+    });
+    list.addEventListener("toggle", function(e){
+      var d = e.target; if(d.getAttribute && d.getAttribute("data-gkey")) supplyOpen[d.getAttribute("data-gkey")] = d.open;
+    }, true);
+    document.getElementById("supSup").addEventListener("change", function(e){ supplyState.sup = e.target.value; renderSupply(); });
+    document.getElementById("supSearch").addEventListener("input", function(e){ supplyState.q = e.target.value.trim().toLowerCase(); renderSupply(); });
+    document.getElementById("supNeedOnly").addEventListener("change", function(e){ supplyState.needOnly = e.target.checked; renderSupply(); });
+    document.getElementById("supNewOnly").addEventListener("change", function(e){ supplyState.newOnly = e.target.checked; renderSupply(); });
+    document.getElementById("supCopyBtn").addEventListener("click", function(){
+      var out = [];
+      ["B","C"].forEach(function(sup){
+        var need = supplyItems.filter(function(i){ return i.s === sup && supply[i.id]; });
+        if(!need.length) return;
+        out.push(SUPPLY_NAMES[sup].toUpperCase());
+        var lines = [];
+        need.forEach(function(i){ if(lines.indexOf(i.line) < 0) lines.push(i.line); });
+        lines.forEach(function(l){
+          out.push(l + ": " + need.filter(function(i){ return i.line === l; }).map(function(i){ return i.name + " x" + supply[i.id] + (/sold out/i.test(i.note) ? " (sold out)" : ""); }).join(", "));
+        });
+        out.push("");
+      });
+      var text = out.join("\n").trim();
+      if(!text){ toast("Nothing is marked to order yet."); return; }
+      var ta = document.getElementById("supOrderText");
+      ta.value = text; ta.style.display = "block";
+      var done = function(){ toast("Order list copied."); };
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, function(){ ta.focus(); ta.select(); }); }
+      else { ta.focus(); ta.select(); }
+    });
+  })();
 
   /* ---------------- Init ---------------- */
   renderHeaderBizInfo();
